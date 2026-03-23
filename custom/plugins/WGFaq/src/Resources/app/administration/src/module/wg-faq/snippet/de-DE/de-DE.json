@@ -54,10 +54,15 @@
             "previewText": "Zeigt FAQs als Akkordeon an",
             "config": {
                 "tabContent": "Inhalt",
+                "tabSeo": "SEO & HTML",
                 "titleLabel": "Überschrift",
                 "titlePlaceholder": "Häufig gestellte Fragen",
                 "displayFilterLabel": "FAQ-Filter",
-                "showDetailLinksLabel": "Detail-Links anzeigen"
+                "showDetailLinksLabel": "Detail-Links anzeigen",
+                "headlineTagLabel": "HTML-Tag der Überschrift",
+                "headlineTagHelp": "Definiert den HTML-Tag (h2, h3, ...) der Hauptüberschrift. Nutzen Sie dies zur Optimierung der HTML-Hierarchie Ihrer Erlebniswelten.",
+                "accordionHeadlineTagLabel": "HTML-Tag der Fragen",
+                "accordionHeadlineTagHelp": "Definiert den HTML-Tag der einzelnen FAQ-Fragen im Akkordeon. Sollte eine Ebene unter der Hauptüberschrift liegen."
             }
         }
     }

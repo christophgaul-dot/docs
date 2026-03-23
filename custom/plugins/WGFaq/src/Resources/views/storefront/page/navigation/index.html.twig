@@ -4,14 +4,18 @@
 {% block cms_page %}
     {{ parent() }}
 
-    {% if page.extensions.wgFaqs is defined and page.extensions.wgFaqs|length > 0 %}
-        <div class="container">
-            {% sw_include '@WGFaq/storefront/component/faq-accordion.html.twig' with {
-                faqs: page.extensions.wgFaqs,
-                faqTitle: "wg-faq.sectionTitle"|trans,
-                accordionId: 'navigation',
-                showDetailLink: false
-            } %}
-        </div>
-    {% endif %}
+    {% block wg_faq_navigation_section %}
+        {% if page.extensions.wgFaqs is defined and page.extensions.wgFaqs|length > 0 %}
+            <div class="container">
+                {% sw_include '@WGFaq/storefront/component/faq-accordion.html.twig' with {
+                    faqs: page.extensions.wgFaqs,
+                    faqTitle: "wg-faq.sectionTitle"|trans,
+                    headlineTag: 'h2',
+                    accordionHeadlineTag: 'h3',
+                    accordionId: 'navigation',
+                    showDetailLink: false
+                } %}
+            </div>
+        {% endif %}
+    {% endblock %}
 {% endblock %}

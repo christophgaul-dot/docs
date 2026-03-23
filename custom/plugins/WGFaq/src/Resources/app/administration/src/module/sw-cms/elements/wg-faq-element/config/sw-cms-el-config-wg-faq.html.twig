@@ -4,6 +4,9 @@
             <sw-tabs-item :title="$tc('wg-faq.cms.config.tabContent')" name="content" :active-tab="active">
                 {{ $tc('wg-faq.cms.config.tabContent') }}
             </sw-tabs-item>
+            <sw-tabs-item :title="$tc('wg-faq.cms.config.tabSeo')" name="seo" :active-tab="active">
+                {{ $tc('wg-faq.cms.config.tabSeo') }}
+            </sw-tabs-item>
         </template>
 
         <template #content="{ active }">
@@ -24,6 +27,24 @@
                     :label="$tc('wg-faq.cms.config.showDetailLinksLabel')"
                     v-model="element.config.showDetailLinks.value">
                 </sw-switch-field>
+            </sw-container>
+        </template>
+
+        <template #seo="{ active }">
+            <sw-container v-if="active === 'seo'" columns="1fr">
+                <sw-single-select
+                    :label="$tc('wg-faq.cms.config.headlineTagLabel')"
+                    :help-text="$tc('wg-faq.cms.config.headlineTagHelp')"
+                    v-model="element.config.headlineTag.value"
+                    :options="headlineTagOptions">
+                </sw-single-select>
+
+                <sw-single-select
+                    :label="$tc('wg-faq.cms.config.accordionHeadlineTagLabel')"
+                    :help-text="$tc('wg-faq.cms.config.accordionHeadlineTagHelp')"
+                    v-model="element.config.accordionHeadlineTag.value"
+                    :options="headlineTagOptions">
+                </sw-single-select>
             </sw-container>
         </template>
     </sw-tabs>

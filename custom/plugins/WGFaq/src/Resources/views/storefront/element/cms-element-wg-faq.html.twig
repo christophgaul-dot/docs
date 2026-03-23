@@ -4,6 +4,8 @@
             {% sw_include '@WGFaq/storefront/component/faq-accordion.html.twig' with {
                 faqs: element.data.faqs,
                 faqTitle: element.config.title.value|default(null),
+                headlineTag: element.config.headlineTag.value|default('h2'),
+                accordionHeadlineTag: element.config.accordionHeadlineTag.value|default('h3'),
                 accordionId: 'cms' ~ element.id|replace({'-': ''}),
                 showDetailLink: element.config.showDetailLinks.value|default(false)
             } %}

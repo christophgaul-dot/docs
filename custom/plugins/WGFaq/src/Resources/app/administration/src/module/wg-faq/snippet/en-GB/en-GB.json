@@ -54,10 +54,15 @@
             "previewText": "Displays FAQs as accordion",
             "config": {
                 "tabContent": "Content",
+                "tabSeo": "SEO & HTML",
                 "titleLabel": "Title",
                 "titlePlaceholder": "Frequently Asked Questions",
                 "displayFilterLabel": "FAQ filter",
-                "showDetailLinksLabel": "Show detail links"
+                "showDetailLinksLabel": "Show detail links",
+                "headlineTagLabel": "Headline HTML tag",
+                "headlineTagHelp": "Defines the HTML tag (h2, h3, ...) of the main headline. Use this to optimise the HTML hierarchy of your Shopping Experiences.",
+                "accordionHeadlineTagLabel": "Question HTML tag",
+                "accordionHeadlineTagHelp": "Defines the HTML tag of the individual FAQ questions in the accordion. Should be one level below the main headline."
             }
         }
     }

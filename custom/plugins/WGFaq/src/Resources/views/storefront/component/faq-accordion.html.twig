@@ -1,110 +1,145 @@
-{% sw_extends '@Storefront/storefront/base.html.twig' %}
-
 {#
-    FAQ Accordion Component
-    Usage: {% sw_include '@WGFaq/storefront/component/faq-accordion.html.twig' with { faqs: faqCollection } %}
+    FAQ Accordion Component (ThemeWare®-compatible)
+
+    Usage: {% sw_include '@WGFaq/storefront/component/faq-accordion.html.twig' with {
+        faqs: faqCollection,
+        faqTitle: 'My Title',
+        headlineTag: 'h2',
+        accordionHeadlineTag: 'h3',
+        accordionId: 'unique',
+        showDetailLink: false
+    } %}
+
+    Headline tags are configurable for SEO hierarchy optimization
+    (compatible with ThemeWare® SEO & Pagespeed patterns).
 #}
 
 {% block wg_faq_accordion %}
     {% if faqs is defined and faqs|length > 0 %}
+        {% set headlineTag = headlineTag|default('h2') %}
+        {% set accordionHeadlineTag = accordionHeadlineTag|default('h3') %}
+
         <div class="wg-faq-section mb-4">
-            {% if faqTitle is defined and faqTitle %}
-                <h2 class="wg-faq-title h3 mb-3">{{ faqTitle }}</h2>
-            {% endif %}
+            {% block wg_faq_accordion_title %}
+                {% if faqTitle is defined and faqTitle %}
+                    <{{ headlineTag }} class="wg-faq-title h3 mb-3">{{ faqTitle }}</{{ headlineTag }}>
+                {% endif %}
+            {% endblock %}
 
-            {# Schema.org FAQPage Markup #}
-            <script type="application/ld+json">
-            {
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                "mainEntity": [
+            {% block wg_faq_accordion_schema %}
+                {# Schema.org FAQPage Markup (JSON-LD) #}
+                <script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    "mainEntity": [
+                        {% for faq in faqs %}
+                        {
+                            "@type": "Question",
+                            "name": {{ faq.translated.question|json_encode|raw }},
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": {{ faq.translated.answer|striptags|json_encode|raw }}
+                            }
+                        }{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ]
+                }
+                </script>
+            {% endblock %}
+
+            {% block wg_faq_accordion_list %}
+                <div class="accordion wg-faq-accordion" id="wgFaqAccordion{{ accordionId|default('default') }}">
                     {% for faq in faqs %}
-                    {
-                        "@type": "Question",
-                        "name": {{ faq.translated.question|json_encode|raw }},
-                        "acceptedAnswer": {
-                            "@type": "Answer",
-                            "text": {{ faq.translated.answer|striptags|json_encode|raw }}
-                        }
-                    }{% if not loop.last %},{% endif %}
-                    {% endfor %}
-                ]
-            }
-            </script>
+                        {% block wg_faq_accordion_item %}
+                            <div class="accordion-item wg-faq-item">
+                                {% block wg_faq_accordion_item_header %}
+                                    <{{ accordionHeadlineTag }} class="accordion-header" id="wgFaqHeading{{ faq.id }}">
+                                        <button class="accordion-button collapsed"
+                                                type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#wgFaqCollapse{{ faq.id }}"
+                                                aria-expanded="false"
+                                                aria-controls="wgFaqCollapse{{ faq.id }}">
+                                            {{ faq.translated.question }}
+                                        </button>
+                                    </{{ accordionHeadlineTag }}>
+                                {% endblock %}
 
-            <div class="accordion wg-faq-accordion" id="wgFaqAccordion{{ accordionId|default('default') }}">
-                {% for faq in faqs %}
-                    <div class="accordion-item wg-faq-item">
-                        <h3 class="accordion-header" id="wgFaqHeading{{ faq.id }}">
-                            <button class="accordion-button collapsed"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#wgFaqCollapse{{ faq.id }}"
-                                    aria-expanded="false"
-                                    aria-controls="wgFaqCollapse{{ faq.id }}">
-                                {{ faq.translated.question }}
-                            </button>
-                        </h3>
-                        <div id="wgFaqCollapse{{ faq.id }}"
-                             class="accordion-collapse collapse"
-                             aria-labelledby="wgFaqHeading{{ faq.id }}"
-                             data-bs-parent="#wgFaqAccordion{{ accordionId|default('default') }}">
-                            <div class="accordion-body wg-faq-answer">
-                                <div class="wg-faq-answer-content">
-                                    {# Media (image) #}
-                                    {% if faq.media %}
-                                        <div class="wg-faq-media mb-3">
-                                            <img src="{{ faq.media.url }}"
-                                                 alt="{{ faq.translated.question }}"
-                                                 class="img-fluid rounded"
-                                                 loading="lazy" />
-                                        </div>
-                                    {% endif %}
+                                <div id="wgFaqCollapse{{ faq.id }}"
+                                     class="accordion-collapse collapse"
+                                     aria-labelledby="wgFaqHeading{{ faq.id }}"
+                                     data-bs-parent="#wgFaqAccordion{{ accordionId|default('default') }}">
+                                    <div class="accordion-body wg-faq-answer">
+                                        {% block wg_faq_accordion_item_body %}
+                                            <div class="wg-faq-answer-content">
+                                                {% block wg_faq_accordion_item_media %}
+                                                    {# Media (image) #}
+                                                    {% if faq.media %}
+                                                        <div class="wg-faq-media mb-3">
+                                                            <img src="{{ faq.media.url }}"
+                                                                 alt="{{ faq.translated.question }}"
+                                                                 class="img-fluid rounded"
+                                                                 loading="lazy"
+                                                                 width="{{ faq.media.metaData.width|default('') }}"
+                                                                 height="{{ faq.media.metaData.height|default('') }}" />
+                                                        </div>
+                                                    {% endif %}
+                                                {% endblock %}
 
-                                    {# Answer text (supports HTML) #}
-                                    <div class="wg-faq-text">
-                                        {{ faq.translated.answer|raw }}
+                                                {% block wg_faq_accordion_item_text %}
+                                                    {# Answer text (supports HTML) #}
+                                                    <div class="wg-faq-text">
+                                                        {{ faq.translated.answer|raw }}
+                                                    </div>
+                                                {% endblock %}
+
+                                                {% block wg_faq_accordion_item_video %}
+                                                    {# Video embed #}
+                                                    {% if faq.videoUrl %}
+                                                        <div class="wg-faq-video mt-3">
+                                                            {% if faq.videoType == 'youtube' %}
+                                                                {% set videoId = faq.videoUrl|replace({'https://www.youtube.com/watch?v=': '', 'https://youtube.com/watch?v=': '', 'https://www.youtube.com/embed/': '', 'https://youtu.be/': ''}) %}
+                                                                <div class="ratio ratio-16x9">
+                                                                    <iframe src="https://www.youtube-nocookie.com/embed/{{ videoId }}"
+                                                                            title="{{ faq.translated.question }}"
+                                                                            allowfullscreen
+                                                                            loading="lazy"
+                                                                            referrerpolicy="no-referrer"></iframe>
+                                                                </div>
+                                                            {% else %}
+                                                                <div class="ratio ratio-16x9">
+                                                                    <iframe src="{{ faq.videoUrl }}"
+                                                                            title="{{ faq.translated.question }}"
+                                                                            allowfullscreen
+                                                                            loading="lazy"
+                                                                            referrerpolicy="no-referrer"></iframe>
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endif %}
+                                                {% endblock %}
+                                            </div>
+
+                                            {% block wg_faq_accordion_item_detail_link %}
+                                                {# Link to individual FAQ page #}
+                                                {% if showDetailLink|default(false) %}
+                                                    <div class="wg-faq-detail-link mt-2">
+                                                        <a href="{{ seoUrl('frontend.wg.faq.detail', { faqId: faq.id }) }}"
+                                                           class="btn btn-link btn-sm p-0">
+                                                            {{ "wg-faq.detailLink"|trans|sw_sanitize }}
+                                                        </a>
+                                                    </div>
+                                                {% endif %}
+                                            {% endblock %}
+                                        {% endblock %}
                                     </div>
-
-                                    {# Video embed #}
-                                    {% if faq.videoUrl %}
-                                        <div class="wg-faq-video mt-3">
-                                            {% if faq.videoType == 'youtube' %}
-                                                {% set videoId = faq.videoUrl|replace({'https://www.youtube.com/watch?v=': '', 'https://youtube.com/watch?v=': '', 'https://www.youtube.com/embed/': '', 'https://youtu.be/': ''}) %}
-                                                <div class="ratio ratio-16x9">
-                                                    <iframe src="https://www.youtube-nocookie.com/embed/{{ videoId }}"
-                                                            title="{{ faq.translated.question }}"
-                                                            allowfullscreen
-                                                            loading="lazy"
-                                                            referrerpolicy="no-referrer"></iframe>
-                                                </div>
-                                            {% else %}
-                                                <div class="ratio ratio-16x9">
-                                                    <iframe src="{{ faq.videoUrl }}"
-                                                            title="{{ faq.translated.question }}"
-                                                            allowfullscreen
-                                                            loading="lazy"
-                                                            referrerpolicy="no-referrer"></iframe>
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    {% endif %}
                                 </div>
-
-                                {# Link to individual FAQ page #}
-                                {% if showDetailLink|default(false) %}
-                                    <div class="wg-faq-detail-link mt-2">
-                                        <a href="{{ seoUrl('frontend.wg.faq.detail', { faqId: faq.id }) }}"
-                                           class="btn btn-link btn-sm p-0">
-                                            {{ "wg-faq.detailLink"|trans|sw_sanitize }}
-                                        </a>
-                                    </div>
-                                {% endif %}
                             </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
+                        {% endblock %}
+                    {% endfor %}
+                </div>
+            {% endblock %}
         </div>
     {% endif %}
 {% endblock %}

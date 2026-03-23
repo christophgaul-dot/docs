@@ -1,33 +1,38 @@
 {% sw_extends '@Storefront/storefront/page/product-detail/index.html.twig' %}
 
-{# Inject FAQs on product detail pages #}
+{# Inject FAQs on product detail pages as a tab #}
 {% block page_product_detail_tabs_content %}
     {{ parent() }}
 
-    {% if page.extensions.wgFaqs is defined and page.extensions.wgFaqs|length > 0 %}
-        <div class="tab-pane fade" id="wg-faq-tab-pane" role="tabpanel" aria-labelledby="wg-faq-tab">
-            {% sw_include '@WGFaq/storefront/component/faq-accordion.html.twig' with {
-                faqs: page.extensions.wgFaqs,
-                accordionId: 'productFaq',
-                showDetailLink: false
-            } %}
-        </div>
-    {% endif %}
+    {% block wg_faq_product_tab_content %}
+        {% if page.extensions.wgFaqs is defined and page.extensions.wgFaqs|length > 0 %}
+            <div class="tab-pane fade" id="wg-faq-tab-pane" role="tabpanel" aria-labelledby="wg-faq-tab">
+                {% sw_include '@WGFaq/storefront/component/faq-accordion.html.twig' with {
+                    faqs: page.extensions.wgFaqs,
+                    accordionHeadlineTag: 'h3',
+                    accordionId: 'productFaq',
+                    showDetailLink: false
+                } %}
+            </div>
+        {% endif %}
+    {% endblock %}
 {% endblock %}
 
 {% block page_product_detail_tabs_navigation %}
     {{ parent() }}
 
-    {% if page.extensions.wgFaqs is defined and page.extensions.wgFaqs|length > 0 %}
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="wg-faq-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#wg-faq-tab-pane"
-                    type="button" role="tab"
-                    aria-controls="wg-faq-tab-pane"
-                    aria-selected="false">
-                {{ "wg-faq.productTabTitle"|trans|sw_sanitize }}
-            </button>
-        </li>
-    {% endif %}
+    {% block wg_faq_product_tab_navigation %}
+        {% if page.extensions.wgFaqs is defined and page.extensions.wgFaqs|length > 0 %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="wg-faq-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#wg-faq-tab-pane"
+                        type="button" role="tab"
+                        aria-controls="wg-faq-tab-pane"
+                        aria-selected="false">
+                    {{ "wg-faq.productTabTitle"|trans|sw_sanitize }}
+                </button>
+            </li>
+        {% endif %}
+    {% endblock %}
 {% endblock %}

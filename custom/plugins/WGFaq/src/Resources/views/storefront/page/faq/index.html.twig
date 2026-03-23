@@ -4,6 +4,7 @@
     {{ parent() }}
     <title>{{ "wg-faq.pageTitle"|trans|sw_sanitize }} | {{ page.header.shop.name }}</title>
     <meta name="description" content="{{ "wg-faq.pageDescription"|trans|sw_sanitize }}" />
+    <link rel="canonical" href="{{ path('frontend.wg.faq.index') }}" />
 {% endblock %}
 
 {% block base_main_inner %}
@@ -19,12 +20,15 @@
                         {% sw_include '@WGFaq/storefront/component/faq-accordion.html.twig' with {
                             faqs: faqs,
                             accordionId: 'faqPage',
+                            accordionHeadlineTag: 'h2',
                             showDetailLink: true
                         } %}
                     {% else %}
-                        <div class="alert alert-info">
-                            {{ "wg-faq.noFaqs"|trans|sw_sanitize }}
-                        </div>
+                        {% block wg_faq_page_empty %}
+                            <div class="alert alert-info">
+                                {{ "wg-faq.noFaqs"|trans|sw_sanitize }}
+                            </div>
+                        {% endblock %}
                     {% endif %}
                 {% endblock %}
             </div>

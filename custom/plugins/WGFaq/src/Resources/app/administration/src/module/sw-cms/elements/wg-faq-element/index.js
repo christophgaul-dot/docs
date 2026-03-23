@@ -13,6 +13,14 @@ Shopware.Service('cmsService').registerCmsElement({
             source: 'static',
             value: 'Häufig gestellte Fragen',
         },
+        headlineTag: {
+            source: 'static',
+            value: 'h2',
+        },
+        accordionHeadlineTag: {
+            source: 'static',
+            value: 'h3',
+        },
         displayFilter: {
             source: 'static',
             value: 'showOnFaqPage',

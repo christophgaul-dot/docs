@@ -67,6 +67,23 @@ Yes, you can connect to your PaaS instance — but not via traditional SSH. Inst
 
 You can see the status of your PaaS application by running `sw-paas application list`. This command shows the current status of your application, including whether the update was successful or if it's still in progress. To monitor all real-time events associated with the project and its applications run `sw-paas watch` this provides a live stream of events and is especially useful for tracking the progress of an ongoing update.
 
+## How can I download an extension as a ZIP file for installation?
+
+If you need to download an extension as a ZIP file, you can do so through the [Shopware Account](https://account.shopware.com):
+
+1. Log in to [account.shopware.com](https://account.shopware.com)
+2. Navigate to your shop in the Merchant or Account area
+3. Go to the extension you want to download
+4. Click the download button to get the ZIP file
+
+However, on PaaS, uploading ZIP files manually is **not recommended**. Since PaaS environments are ephemeral, any manually uploaded extensions will be lost on the next deployment. Instead, use Composer to install extensions:
+
+```bash
+composer require store.shopware.com/{extension-name}
+```
+
+For more details, refer to the [Extension Management guide](/guides/hosting/installation-updates/extension-management).
+
 ## Why do I see “Runtime extension management is disabled” when trying to purchase extensions in the admin?
 
 When trying to purchase an extension via the in-app store, the admin shows the error “Runtime extension management is disabled.” Even after setting runtime_extension_management: true in `config/packages/z-shopware.yaml` and deploying, the error will persist.

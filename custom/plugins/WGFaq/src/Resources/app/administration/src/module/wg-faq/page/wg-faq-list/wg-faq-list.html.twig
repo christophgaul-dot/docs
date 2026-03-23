@@ -5,6 +5,21 @@
 
     <template #smart-bar-actions>
         <sw-button
+            variant="ghost"
+            :isLoading="isExporting"
+            @click="onExport">
+            <sw-icon name="regular-download" small></sw-icon>
+            {{ $tc('wg-faq.list.buttonExport') }}
+        </sw-button>
+
+        <sw-button
+            variant="ghost"
+            @click="onOpenImport">
+            <sw-icon name="regular-upload" small></sw-icon>
+            {{ $tc('wg-faq.list.buttonImport') }}
+        </sw-button>
+
+        <sw-button
             :routerLink="{ name: 'wg.faq.create' }"
             variant="primary">
             {{ $tc('wg-faq.list.buttonCreate') }}
@@ -12,6 +27,47 @@
     </template>
 
     <template #content>
+        <!-- Import Modal -->
+        <sw-modal
+            v-if="showImportModal"
+            :title="$tc('wg-faq.list.importTitle')"
+            @modal-close="showImportModal = false">
+
+            <div class="wg-faq-import-modal">
+                <p>{{ $tc('wg-faq.list.importDescription') }}</p>
+
+                <sw-file-input
+                    accept="application/json,.json"
+                    :label="$tc('wg-faq.list.importFileLabel')"
+                    @change="onImportFileSelected">
+                </sw-file-input>
+
+                <sw-alert v-if="importResult" :variant="importResult.success ? 'success' : 'warning'">
+                    {{ importResult.message }}
+                    <template v-if="importResult.errors && importResult.errors.length">
+                        <ul style="margin-top: 8px;">
+                            <li v-for="error in importResult.errors" :key="error">{{ error }}</li>
+                        </ul>
+                    </template>
+                </sw-alert>
+            </div>
+
+            <template #modal-footer>
+                <sw-button
+                    variant="ghost"
+                    @click="showImportModal = false">
+                    {{ $tc('wg-faq.list.importClose') }}
+                </sw-button>
+                <sw-button
+                    variant="primary"
+                    :isLoading="isImporting"
+                    :disabled="!importFile"
+                    @click="onImport">
+                    {{ $tc('wg-faq.list.importStart') }}
+                </sw-button>
+            </template>
+        </sw-modal>
+
         <sw-entity-listing
             v-if="faqs"
             :items="faqs"

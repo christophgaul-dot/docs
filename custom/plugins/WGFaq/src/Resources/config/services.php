@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
+use WG\Faq\Administration\Controller\FaqExportImportController;
 use WG\Faq\Core\Content\Faq\FaqDefinition;
 use WG\Faq\Core\Content\Faq\Aggregate\FaqTranslation\FaqTranslationDefinition;
 use WG\Faq\Core\Content\Faq\SeoUrl\FaqSeoUrlListener;
@@ -64,4 +65,13 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             new Reference('router'),
         ])
         ->tag('shopware.sitemap_url_provider');
+
+    // FAQ Export/Import API controller
+    $services->set(FaqExportImportController::class)
+        ->args([
+            new Reference('wg_faq.repository'),
+            new Reference('category.repository'),
+        ])
+        ->public()
+        ->call('setContainer', [new Reference('service_container')]);
 };

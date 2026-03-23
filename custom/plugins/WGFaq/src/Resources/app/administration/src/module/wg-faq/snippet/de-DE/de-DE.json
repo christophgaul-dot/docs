@@ -11,6 +11,8 @@
             "columnPosition": "Position",
             "columnShowOn": "Anzeige auf",
             "buttonCreate": "FAQ erstellen",
+            "buttonExport": "Exportieren",
+            "buttonImport": "Importieren",
             "home": "Startseite",
             "category": "Kategorien",
             "product": "Produkte",
@@ -18,7 +20,16 @@
             "contextMenuEdit": "Bearbeiten",
             "contextMenuDelete": "Löschen",
             "messageSaveSuccess": "FAQ wurde erfolgreich gespeichert.",
-            "messageDeleteSuccess": "FAQ wurde erfolgreich gelöscht."
+            "messageDeleteSuccess": "FAQ wurde erfolgreich gelöscht.",
+            "exportSuccess": "FAQs wurden erfolgreich exportiert.",
+            "exportError": "Export fehlgeschlagen",
+            "importTitle": "FAQs importieren",
+            "importDescription": "Wählen Sie eine JSON-Datei aus, die zuvor über die Export-Funktion erstellt wurde. Bestehende FAQs mit gleicher ID werden aktualisiert, neue FAQs werden erstellt. Seitenzuordnungen (Startseite, Kategorien, Produkte, FAQ-Seite) und Kategorie-Zuweisungen werden ebenfalls importiert.",
+            "importFileLabel": "JSON-Datei auswählen",
+            "importStart": "Import starten",
+            "importClose": "Schliessen",
+            "importError": "Import fehlgeschlagen",
+            "importSuccess": "FAQs wurden erfolgreich importiert."
         },
         "detail": {
             "title": "FAQ bearbeiten",

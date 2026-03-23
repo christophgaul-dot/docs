@@ -19,6 +19,11 @@ Component.register('wg-faq-list', {
             isLoading: true,
             sortBy: 'position',
             sortDirection: 'ASC',
+            isExporting: false,
+            isImporting: false,
+            showImportModal: false,
+            importFile: null,
+            importResult: null,
         };
     },
 
@@ -107,6 +112,117 @@ Component.register('wg-faq-list', {
                     message: error.message,
                 });
             }
+        },
+
+        async onExport() {
+            this.isExporting = true;
+
+            try {
+                const headers = {
+                    Authorization: `Bearer ${Shopware.Context.api.authToken.access}`,
+                    Accept: 'application/json',
+                };
+
+                const response = await fetch('/api/wg-faq/export', { headers });
+
+                if (!response.ok) {
+                    throw new Error(`Export fehlgeschlagen (HTTP ${response.status})`);
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const today = new Date().toISOString().slice(0, 10);
+                link.href = url;
+                link.download = `wg-faq-export-${today}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+
+                this.createNotificationSuccess({
+                    message: this.$tc('wg-faq.list.exportSuccess'),
+                });
+            } catch (error) {
+                this.createNotificationError({
+                    message: this.$tc('wg-faq.list.exportError') + ': ' + error.message,
+                });
+            } finally {
+                this.isExporting = false;
+            }
+        },
+
+        onOpenImport() {
+            this.showImportModal = true;
+            this.importFile = null;
+            this.importResult = null;
+        },
+
+        onImportFileSelected(file) {
+            this.importFile = file;
+            this.importResult = null;
+        },
+
+        async onImport() {
+            if (!this.importFile) {
+                return;
+            }
+
+            this.isImporting = true;
+            this.importResult = null;
+
+            try {
+                const fileContent = await this.readFileContent(this.importFile);
+                const parsed = JSON.parse(fileContent);
+
+                if (!parsed.faqs || !Array.isArray(parsed.faqs)) {
+                    throw new Error('Ungültiges Format: "faqs" Array fehlt.');
+                }
+
+                const headers = {
+                    Authorization: `Bearer ${Shopware.Context.api.authToken.access}`,
+                    'Content-Type': 'application/json',
+                };
+
+                const response = await fetch('/api/wg-faq/import', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(parsed),
+                });
+
+                this.importResult = await response.json();
+
+                if (this.importResult.success) {
+                    this.createNotificationSuccess({
+                        message: this.importResult.message,
+                    });
+                    await this.getList();
+                } else {
+                    this.createNotificationWarning({
+                        message: this.importResult.message,
+                    });
+                }
+            } catch (error) {
+                this.importResult = {
+                    success: false,
+                    message: error.message,
+                    errors: [],
+                };
+                this.createNotificationError({
+                    message: this.$tc('wg-faq.list.importError') + ': ' + error.message,
+                });
+            } finally {
+                this.isImporting = false;
+            }
+        },
+
+        readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = () => reject(new Error('Datei konnte nicht gelesen werden.'));
+                reader.readAsText(file);
+            });
         },
     },
 });

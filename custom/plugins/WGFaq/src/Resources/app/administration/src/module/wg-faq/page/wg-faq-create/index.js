@@ -6,6 +6,8 @@ Component.extend('wg-faq-create', 'wg-faq-detail', {
             this.faq = this.faqRepository.create();
             this.faq.active = true;
             this.faq.position = 0;
+            this.faq.question = '';
+            this.faq.answer = '';
             this.faq.showOnHome = false;
             this.faq.showOnCategory = false;
             this.faq.showOnProduct = false;

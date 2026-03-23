@@ -1,0 +1,12 @@
+{% block element_wg_faq %}
+    <div class="cms-element-wg-faq">
+        {% if element.data.faqs is defined and element.data.faqs|length > 0 %}
+            {% sw_include '@WGFaq/storefront/component/faq-accordion.html.twig' with {
+                faqs: element.data.faqs,
+                faqTitle: element.config.title.value|default(null),
+                accordionId: 'cms' ~ element.id|replace({'-': ''}),
+                showDetailLink: element.config.showDetailLinks.value|default(false)
+            } %}
+        {% endif %}
+    </div>
+{% endblock %}

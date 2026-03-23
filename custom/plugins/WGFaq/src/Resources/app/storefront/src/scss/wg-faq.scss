@@ -1,0 +1,101 @@
+// WG FAQ Plugin Styles
+.wg-faq-section {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.wg-faq-title {
+    font-weight: 600;
+}
+
+.wg-faq-accordion {
+    .accordion-item {
+        border: 1px solid #dee2e6;
+        margin-bottom: -1px;
+
+        &:first-child {
+            border-top-left-radius: 0.375rem;
+            border-top-right-radius: 0.375rem;
+        }
+
+        &:last-child {
+            border-bottom-left-radius: 0.375rem;
+            border-bottom-right-radius: 0.375rem;
+            margin-bottom: 0;
+        }
+    }
+
+    .accordion-button {
+        font-weight: 500;
+        font-size: 1rem;
+        color: #333;
+        background-color: #f8f9fa;
+
+        &:not(.collapsed) {
+            color: var(--bs-primary, #0d6efd);
+            background-color: #e7f1ff;
+            box-shadow: none;
+        }
+
+        &:focus {
+            box-shadow: none;
+            border-color: rgba(0, 0, 0, 0.125);
+        }
+
+        &::after {
+            transition: transform 0.2s ease-in-out;
+        }
+    }
+
+    .accordion-body {
+        padding: 1.25rem;
+    }
+}
+
+.wg-faq-answer-content {
+    .wg-faq-media {
+        max-width: 600px;
+
+        img {
+            width: 100%;
+            height: auto;
+        }
+    }
+
+    .wg-faq-text {
+        line-height: 1.6;
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    .wg-faq-video {
+        max-width: 800px;
+    }
+}
+
+// FAQ page styles
+.wg-faq-page-title {
+    font-weight: 700;
+}
+
+// FAQ detail page styles
+.wg-faq-detail {
+    .wg-faq-detail-question {
+        font-weight: 700;
+    }
+
+    .wg-faq-detail-answer {
+        font-size: 1.05rem;
+        line-height: 1.7;
+    }
+
+    .wg-faq-detail-media {
+        max-width: 800px;
+    }
+
+    .wg-faq-detail-video {
+        max-width: 800px;
+    }
+}

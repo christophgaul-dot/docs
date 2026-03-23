@@ -1,0 +1,124 @@
+<sw-page class="wg-faq-detail">
+    <template #smart-bar-header>
+        <h2 v-if="faq">{{ faq.translated ? faq.translated.question : $tc('wg-faq.detail.title') }}</h2>
+        <h2 v-else>{{ $tc('wg-faq.detail.title') }}</h2>
+    </template>
+
+    <template #smart-bar-actions>
+        <sw-button-process
+            :isLoading="isSaving"
+            variant="primary"
+            @click="onSave">
+            {{ $tc('global.default.save') }}
+        </sw-button-process>
+    </template>
+
+    <template #content>
+        <sw-card-view v-if="faq">
+
+            {# General Settings #}
+            <sw-card :title="$tc('wg-faq.detail.cardTitle')" :isLoading="isLoading">
+                <sw-text-field
+                    :label="$tc('wg-faq.detail.labelQuestion')"
+                    :placeholder="$tc('wg-faq.detail.placeholderQuestion')"
+                    v-model="faq.question"
+                    required>
+                </sw-text-field>
+
+                <sw-text-editor
+                    :label="$tc('wg-faq.detail.labelAnswer')"
+                    :placeholder="$tc('wg-faq.detail.placeholderAnswer')"
+                    v-model="faq.answer"
+                    required>
+                </sw-text-editor>
+
+                <sw-number-field
+                    :label="$tc('wg-faq.detail.labelPosition')"
+                    v-model="faq.position"
+                    :min="0">
+                </sw-number-field>
+
+                <sw-switch-field
+                    :label="$tc('wg-faq.detail.labelActive')"
+                    v-model="faq.active">
+                </sw-switch-field>
+            </sw-card>
+
+            {# Display Settings #}
+            <sw-card :title="$tc('wg-faq.detail.cardDisplay')">
+                <sw-switch-field
+                    :label="$tc('wg-faq.detail.labelShowOnHome')"
+                    v-model="faq.showOnHome">
+                </sw-switch-field>
+
+                <sw-switch-field
+                    :label="$tc('wg-faq.detail.labelShowOnCategory')"
+                    v-model="faq.showOnCategory">
+                </sw-switch-field>
+
+                <sw-switch-field
+                    :label="$tc('wg-faq.detail.labelShowOnProduct')"
+                    v-model="faq.showOnProduct">
+                </sw-switch-field>
+
+                <sw-switch-field
+                    :label="$tc('wg-faq.detail.labelShowOnFaqPage')"
+                    v-model="faq.showOnFaqPage">
+                </sw-switch-field>
+
+                <sw-entity-multi-id-select
+                    v-if="faq.showOnCategory"
+                    :label="$tc('wg-faq.detail.labelCategoryIds')"
+                    v-model="faq.categoryIds"
+                    entity="category">
+                </sw-entity-multi-id-select>
+            </sw-card>
+
+            {# Media Settings #}
+            <sw-card :title="$tc('wg-faq.detail.cardMedia')">
+                <sw-media-field
+                    :label="$tc('wg-faq.detail.labelMedia')"
+                    v-model="faq.mediaId"
+                    @media-id-change="onSetMediaItem"
+                    @media-drop="onMediaDropped">
+                </sw-media-field>
+
+                <sw-text-field
+                    :label="$tc('wg-faq.detail.labelVideoUrl')"
+                    v-model="faq.videoUrl">
+                </sw-text-field>
+
+                <sw-single-select
+                    :label="$tc('wg-faq.detail.labelVideoType')"
+                    :placeholder="$tc('wg-faq.detail.labelVideoTypePlaceholder')"
+                    v-model="faq.videoType"
+                    :options="[
+                        { value: 'youtube', label: 'YouTube' },
+                        { value: 'vimeo', label: 'Vimeo' },
+                        { value: 'other', label: 'Other' }
+                    ]">
+                </sw-single-select>
+            </sw-card>
+
+            {# SEO Settings #}
+            <sw-card :title="$tc('wg-faq.detail.cardSeo')">
+                <sw-text-field
+                    :label="$tc('wg-faq.detail.labelSeoUrl')"
+                    :helpText="$tc('wg-faq.detail.labelSeoUrlHelp')"
+                    v-model="faq.seoUrl">
+                </sw-text-field>
+
+                <sw-text-field
+                    :label="$tc('wg-faq.detail.labelMetaTitle')"
+                    v-model="faq.metaTitle">
+                </sw-text-field>
+
+                <sw-textarea-field
+                    :label="$tc('wg-faq.detail.labelMetaDescription')"
+                    v-model="faq.metaDescription">
+                </sw-textarea-field>
+            </sw-card>
+
+        </sw-card-view>
+    </template>
+</sw-page>

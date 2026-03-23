@@ -1,0 +1,30 @@
+<div class="sw-cms-el-config-wg-faq">
+    <sw-tabs default-item="content">
+        <template #default="{ active }">
+            <sw-tabs-item :title="$tc('wg-faq.cms.config.tabContent')" name="content" :active-tab="active">
+                {{ $tc('wg-faq.cms.config.tabContent') }}
+            </sw-tabs-item>
+        </template>
+
+        <template #content="{ active }">
+            <sw-container v-if="active === 'content'" columns="1fr">
+                <sw-text-field
+                    :label="$tc('wg-faq.cms.config.titleLabel')"
+                    :placeholder="$tc('wg-faq.cms.config.titlePlaceholder')"
+                    v-model="element.config.title.value">
+                </sw-text-field>
+
+                <sw-single-select
+                    :label="$tc('wg-faq.cms.config.displayFilterLabel')"
+                    v-model="element.config.displayFilter.value"
+                    :options="displayFilterOptions">
+                </sw-single-select>
+
+                <sw-switch-field
+                    :label="$tc('wg-faq.cms.config.showDetailLinksLabel')"
+                    v-model="element.config.showDetailLinks.value">
+                </sw-switch-field>
+            </sw-container>
+        </template>
+    </sw-tabs>
+</div>

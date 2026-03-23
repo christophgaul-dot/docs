@@ -1,0 +1,97 @@
+{% sw_extends '@Storefront/storefront/base.html.twig' %}
+
+{% block base_head %}
+    {{ parent() }}
+    <title>{{ faq.translated.metaTitle ?: faq.translated.question }} | {{ page.header.shop.name }}</title>
+    {% if faq.translated.metaDescription %}
+        <meta name="description" content="{{ faq.translated.metaDescription }}" />
+    {% endif %}
+{% endblock %}
+
+{% block base_main_inner %}
+    <div class="container cms-page">
+        <div class="row">
+            <div class="col-12">
+                {% block wg_faq_detail_breadcrumb %}
+                    <nav aria-label="breadcrumb" class="mb-3">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('frontend.home.page') }}">{{ "general.homeLink"|trans|sw_sanitize }}</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('frontend.wg.faq.index') }}">{{ "wg-faq.pageTitle"|trans|sw_sanitize }}</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                {{ faq.translated.question }}
+                            </li>
+                        </ol>
+                    </nav>
+                {% endblock %}
+
+                {% block wg_faq_detail_content %}
+                    {# Schema.org FAQPage Markup for single question #}
+                    <script type="application/ld+json">
+                    {
+                        "@context": "https://schema.org",
+                        "@type": "FAQPage",
+                        "mainEntity": [{
+                            "@type": "Question",
+                            "name": {{ faq.translated.question|json_encode|raw }},
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": {{ faq.translated.answer|striptags|json_encode|raw }}
+                            }
+                        }]
+                    }
+                    </script>
+
+                    <article class="wg-faq-detail">
+                        <h1 class="wg-faq-detail-question mb-4">{{ faq.translated.question }}</h1>
+
+                        {% if faq.media %}
+                            <div class="wg-faq-detail-media mb-4">
+                                <img src="{{ faq.media.url }}"
+                                     alt="{{ faq.translated.question }}"
+                                     class="img-fluid rounded"
+                                     loading="lazy" />
+                            </div>
+                        {% endif %}
+
+                        <div class="wg-faq-detail-answer">
+                            {{ faq.translated.answer|raw }}
+                        </div>
+
+                        {% if faq.videoUrl %}
+                            <div class="wg-faq-detail-video mt-4">
+                                {% if faq.videoType == 'youtube' %}
+                                    {% set videoId = faq.videoUrl|replace({'https://www.youtube.com/watch?v=': '', 'https://youtube.com/watch?v=': '', 'https://www.youtube.com/embed/': '', 'https://youtu.be/': ''}) %}
+                                    <div class="ratio ratio-16x9">
+                                        <iframe src="https://www.youtube-nocookie.com/embed/{{ videoId }}"
+                                                title="{{ faq.translated.question }}"
+                                                allowfullscreen
+                                                loading="lazy"
+                                                referrerpolicy="no-referrer"></iframe>
+                                    </div>
+                                {% else %}
+                                    <div class="ratio ratio-16x9">
+                                        <iframe src="{{ faq.videoUrl }}"
+                                                title="{{ faq.translated.question }}"
+                                                allowfullscreen
+                                                loading="lazy"
+                                                referrerpolicy="no-referrer"></iframe>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </article>
+
+                    <div class="mt-4">
+                        <a href="{{ path('frontend.wg.faq.index') }}" class="btn btn-outline-primary">
+                            &larr; {{ "wg-faq.backToOverview"|trans|sw_sanitize }}
+                        </a>
+                    </div>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

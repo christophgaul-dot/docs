@@ -1,0 +1,11 @@
+{
+    "wg-faq": {
+        "pageTitle": "Häufig gestellte Fragen",
+        "pageDescription": "Hier finden Sie Antworten auf häufig gestellte Fragen.",
+        "sectionTitle": "Häufig gestellte Fragen",
+        "productTabTitle": "FAQ",
+        "noFaqs": "Aktuell sind keine FAQs vorhanden.",
+        "detailLink": "Mehr erfahren",
+        "backToOverview": "Zurück zur FAQ-Übersicht"
+    }
+}

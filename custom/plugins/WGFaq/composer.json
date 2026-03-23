@@ -1,0 +1,33 @@
+{
+    "name": "wg/faq-plugin",
+    "description": "FAQ Management Plugin for Shopware 6 - Central FAQ management with SEO URLs, Schema.org markup, and flexible page assignments",
+    "version": "1.0.0",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "WG Development"
+        }
+    ],
+    "require": {
+        "shopware/core": "~6.6.0",
+        "shopware/storefront": "~6.6.0",
+        "shopware/administration": "~6.6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WG\\Faq\\": "src/"
+        }
+    },
+    "extra": {
+        "shopware-plugin-class": "WG\\Faq\\WGFaq",
+        "label": {
+            "de-DE": "WG FAQ Manager",
+            "en-GB": "WG FAQ Manager"
+        },
+        "description": {
+            "de-DE": "Zentrale FAQ-Verwaltung mit SEO-URLs, Schema.org Markup und flexibler Seitenzuweisung",
+            "en-GB": "Central FAQ management with SEO URLs, Schema.org markup and flexible page assignments"
+        }
+    }
+}

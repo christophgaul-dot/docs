@@ -1,0 +1,64 @@
+{
+    "wg-faq": {
+        "general": {
+            "mainMenuItemGeneral": "FAQ Management",
+            "descriptionTextModule": "Manage FAQs"
+        },
+        "list": {
+            "title": "FAQ Management",
+            "columnQuestion": "Question",
+            "columnActive": "Active",
+            "columnPosition": "Position",
+            "columnShowOn": "Display on",
+            "buttonCreate": "Create FAQ",
+            "home": "Homepage",
+            "category": "Categories",
+            "product": "Products",
+            "faqPage": "FAQ page",
+            "contextMenuEdit": "Edit",
+            "contextMenuDelete": "Delete",
+            "messageSaveSuccess": "FAQ saved successfully.",
+            "messageDeleteSuccess": "FAQ deleted successfully."
+        },
+        "detail": {
+            "title": "Edit FAQ",
+            "titleNew": "Create new FAQ",
+            "cardTitle": "General",
+            "cardDisplay": "Display",
+            "cardMedia": "Media",
+            "cardSeo": "SEO",
+            "labelQuestion": "Question",
+            "labelAnswer": "Answer",
+            "labelActive": "Active",
+            "labelPosition": "Position",
+            "labelShowOnHome": "Show on homepage",
+            "labelShowOnCategory": "Show on category pages",
+            "labelShowOnProduct": "Show on product pages",
+            "labelShowOnFaqPage": "Show on FAQ page",
+            "labelCategoryIds": "Specific categories (empty = all)",
+            "labelMedia": "Image",
+            "labelVideoUrl": "Video URL",
+            "labelVideoType": "Video type",
+            "labelVideoTypePlaceholder": "e.g. youtube, vimeo",
+            "labelSeoUrl": "SEO URL",
+            "labelSeoUrlHelp": "e.g. 'how-long-delivery' → /faq/how-long-delivery",
+            "labelMetaTitle": "Meta Title",
+            "labelMetaDescription": "Meta Description",
+            "placeholderQuestion": "e.g. How long does delivery take?",
+            "placeholderAnswer": "Enter answer (HTML supported)...",
+            "messageSaveSuccess": "FAQ saved successfully.",
+            "messageSaveError": "Failed to save FAQ."
+        },
+        "cms": {
+            "elementLabel": "FAQ Element",
+            "previewText": "Displays FAQs as accordion",
+            "config": {
+                "tabContent": "Content",
+                "titleLabel": "Title",
+                "titlePlaceholder": "Frequently Asked Questions",
+                "displayFilterLabel": "FAQ filter",
+                "showDetailLinksLabel": "Show detail links"
+            }
+        }
+    }
+}

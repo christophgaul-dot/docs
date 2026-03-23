@@ -1,0 +1,38 @@
+<sw-page class="wg-faq-list">
+    <template #smart-bar-header>
+        <h2>{{ $tc('wg-faq.list.title') }}</h2>
+    </template>
+
+    <template #smart-bar-actions>
+        <sw-button
+            :routerLink="{ name: 'wg.faq.create' }"
+            variant="primary">
+            {{ $tc('wg-faq.list.buttonCreate') }}
+        </sw-button>
+    </template>
+
+    <template #content>
+        <sw-entity-listing
+            v-if="faqs"
+            :items="faqs"
+            :repository="faqRepository"
+            :columns="faqColumns"
+            :isLoading="isLoading"
+            :showSelection="true"
+            :allowEdit="true"
+            :allowDelete="true"
+            detail-route="wg.faq.detail"
+            @delete-item-finish="getList">
+
+            <template #column-active="{ item }">
+                <sw-icon v-if="item.active" name="regular-checkmark-xs" small class="is--active"></sw-icon>
+                <sw-icon v-else name="regular-times-xs" small class="is--inactive"></sw-icon>
+            </template>
+
+            <template #column-showOn="{ item }">
+                {{ getShowOnLabels(item) }}
+            </template>
+
+        </sw-entity-listing>
+    </template>
+</sw-page>

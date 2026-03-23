@@ -1,0 +1,64 @@
+{
+    "wg-faq": {
+        "general": {
+            "mainMenuItemGeneral": "FAQ Verwaltung",
+            "descriptionTextModule": "FAQs verwalten"
+        },
+        "list": {
+            "title": "FAQ Verwaltung",
+            "columnQuestion": "Frage",
+            "columnActive": "Aktiv",
+            "columnPosition": "Position",
+            "columnShowOn": "Anzeige auf",
+            "buttonCreate": "FAQ erstellen",
+            "home": "Startseite",
+            "category": "Kategorien",
+            "product": "Produkte",
+            "faqPage": "FAQ-Seite",
+            "contextMenuEdit": "Bearbeiten",
+            "contextMenuDelete": "Löschen",
+            "messageSaveSuccess": "FAQ wurde erfolgreich gespeichert.",
+            "messageDeleteSuccess": "FAQ wurde erfolgreich gelöscht."
+        },
+        "detail": {
+            "title": "FAQ bearbeiten",
+            "titleNew": "Neue FAQ erstellen",
+            "cardTitle": "Allgemein",
+            "cardDisplay": "Anzeige",
+            "cardMedia": "Medien",
+            "cardSeo": "SEO",
+            "labelQuestion": "Frage",
+            "labelAnswer": "Antwort",
+            "labelActive": "Aktiv",
+            "labelPosition": "Position",
+            "labelShowOnHome": "Auf Startseite anzeigen",
+            "labelShowOnCategory": "Auf Kategorieseiten anzeigen",
+            "labelShowOnProduct": "Auf Produktseiten anzeigen",
+            "labelShowOnFaqPage": "Auf FAQ-Seite anzeigen",
+            "labelCategoryIds": "Bestimmte Kategorien (leer = alle)",
+            "labelMedia": "Bild",
+            "labelVideoUrl": "Video URL",
+            "labelVideoType": "Video Typ",
+            "labelVideoTypePlaceholder": "z.B. youtube, vimeo",
+            "labelSeoUrl": "SEO URL",
+            "labelSeoUrlHelp": "z.B. 'wie-lange-lieferzeit' → /faq/wie-lange-lieferzeit",
+            "labelMetaTitle": "Meta Title",
+            "labelMetaDescription": "Meta Description",
+            "placeholderQuestion": "z.B. Wie lange dauert die Lieferung?",
+            "placeholderAnswer": "Antwort eingeben (HTML möglich)...",
+            "messageSaveSuccess": "FAQ wurde erfolgreich gespeichert.",
+            "messageSaveError": "FAQ konnte nicht gespeichert werden."
+        },
+        "cms": {
+            "elementLabel": "FAQ Element",
+            "previewText": "Zeigt FAQs als Akkordeon an",
+            "config": {
+                "tabContent": "Inhalt",
+                "titleLabel": "Überschrift",
+                "titlePlaceholder": "Häufig gestellte Fragen",
+                "displayFilterLabel": "FAQ-Filter",
+                "showDetailLinksLabel": "Detail-Links anzeigen"
+            }
+        }
+    }
+}

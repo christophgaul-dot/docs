@@ -1,0 +1,33 @@
+{% sw_extends '@Storefront/storefront/base.html.twig' %}
+
+{% block base_head %}
+    {{ parent() }}
+    <title>{{ "wg-faq.pageTitle"|trans|sw_sanitize }} | {{ page.header.shop.name }}</title>
+    <meta name="description" content="{{ "wg-faq.pageDescription"|trans|sw_sanitize }}" />
+{% endblock %}
+
+{% block base_main_inner %}
+    <div class="container cms-page">
+        <div class="row">
+            <div class="col-12">
+                {% block wg_faq_page_header %}
+                    <h1 class="wg-faq-page-title mb-4">{{ "wg-faq.pageTitle"|trans|sw_sanitize }}</h1>
+                {% endblock %}
+
+                {% block wg_faq_page_content %}
+                    {% if faqs|length > 0 %}
+                        {% sw_include '@WGFaq/storefront/component/faq-accordion.html.twig' with {
+                            faqs: faqs,
+                            accordionId: 'faqPage',
+                            showDetailLink: true
+                        } %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            {{ "wg-faq.noFaqs"|trans|sw_sanitize }}
+                        </div>
+                    {% endif %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

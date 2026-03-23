@@ -40,7 +40,7 @@ class FaqTranslationDefinition extends EntityTranslationDefinition
     {
         return new FieldCollection([
             (new StringField('question', 'question', 1024))->addFlags(new Required(), new ApiAware()),
-            (new LongTextField('answer', 'answer'))->addFlags(new Required(), new ApiAware()),
+            (new LongTextField('answer', 'answer'))->addFlags(new ApiAware()),
             (new StringField('seo_url', 'seoUrl', 512))->addFlags(new ApiAware()),
             (new StringField('meta_title', 'metaTitle', 255))->addFlags(new ApiAware()),
             (new StringField('meta_description', 'metaDescription', 512))->addFlags(new ApiAware()),

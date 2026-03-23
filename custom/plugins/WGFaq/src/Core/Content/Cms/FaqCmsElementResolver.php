@@ -12,6 +12,7 @@ use Shopware\Core\Content\Cms\DataResolver\ResolverContext\ResolverContext;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
+use Shopware\Core\Framework\Struct\ArrayStruct;
 use WG\Faq\Core\Content\Faq\FaqDefinition;
 
 class FaqCmsElementResolver extends AbstractCmsElementResolver
@@ -50,6 +51,6 @@ class FaqCmsElementResolver extends AbstractCmsElementResolver
             return;
         }
 
-        $slot->setData(['faqs' => $faqs->getEntities()]);
+        $slot->setData(new ArrayStruct(['faqs' => $faqs->getEntities()]));
     }
 }

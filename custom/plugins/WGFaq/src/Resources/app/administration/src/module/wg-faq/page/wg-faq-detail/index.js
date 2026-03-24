@@ -62,7 +62,7 @@ Component.register('wg-faq-detail', {
         async onSave() {
             if (!this.faq.answer || this.faq.answer.replace(/<[^>]*>/g, '').trim() === '') {
                 this.createNotificationError({
-                    message: this.$tc('wg-faq.detail.messageSaveError') + ' – Antwort darf nicht leer sein.',
+                    message: this.$tc('wg-faq.detail.messageSaveError') + ' – ' + this.$tc('wg-faq.detail.answerRequired'),
                 });
                 return;
             }

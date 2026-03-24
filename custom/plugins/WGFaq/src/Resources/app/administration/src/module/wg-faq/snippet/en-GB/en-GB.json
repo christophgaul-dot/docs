@@ -58,7 +58,8 @@
             "placeholderQuestion": "e.g. How long does delivery take?",
             "placeholderAnswer": "Enter answer (HTML supported)...",
             "messageSaveSuccess": "FAQ saved successfully.",
-            "messageSaveError": "Failed to save FAQ."
+            "messageSaveError": "Failed to save FAQ.",
+            "answerRequired": "Answer must not be empty."
         },
         "cms": {
             "elementLabel": "FAQ Element",

@@ -35,8 +35,8 @@ class FaqSeoUrlListener implements EventSubscriberInterface
         $ids = [];
         foreach ($event->getWriteResults() as $result) {
             $payload = $result->getPayload();
-            if (isset($payload['wgFaqId'])) {
-                $ids[] = $payload['wgFaqId'];
+            if (isset($payload['wg_faq_id'])) {
+                $ids[] = $payload['wg_faq_id'];
             }
         }
 

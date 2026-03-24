@@ -58,7 +58,8 @@
             "placeholderQuestion": "z.B. Wie lange dauert die Lieferung?",
             "placeholderAnswer": "Antwort eingeben (HTML möglich)...",
             "messageSaveSuccess": "FAQ wurde erfolgreich gespeichert.",
-            "messageSaveError": "FAQ konnte nicht gespeichert werden."
+            "messageSaveError": "FAQ konnte nicht gespeichert werden.",
+            "answerRequired": "Antwort darf nicht leer sein."
         },
         "cms": {
             "elementLabel": "FAQ Element",

@@ -76,7 +76,7 @@
 
                         {% block wg_faq_detail_answer %}
                             <div class="wg-faq-detail-answer" itemprop="articleBody">
-                                {{ faq.translated.answer|raw }}
+                                {{ faq.translated.answer|sw_sanitize }}
                             </div>
                         {% endblock %}
 
@@ -92,9 +92,10 @@
                                                     loading="lazy"
                                                     referrerpolicy="no-referrer"></iframe>
                                         </div>
-                                    {% else %}
+                                    {% elseif faq.videoType == 'vimeo' %}
+                                        {% set videoId = faq.videoUrl|replace({'https://vimeo.com/': '', 'https://www.vimeo.com/': '', 'https://player.vimeo.com/video/': ''}) %}
                                         <div class="ratio ratio-16x9">
-                                            <iframe src="{{ faq.videoUrl }}"
+                                            <iframe src="https://player.vimeo.com/video/{{ videoId }}"
                                                     title="{{ faq.translated.question }}"
                                                     allowfullscreen
                                                     loading="lazy"

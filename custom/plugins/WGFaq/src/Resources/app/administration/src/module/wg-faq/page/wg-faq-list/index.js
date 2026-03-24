@@ -6,7 +6,7 @@ const { Criteria } = Shopware.Data;
 Component.register('wg-faq-list', {
     template,
 
-    inject: ['repositoryFactory'],
+    inject: ['repositoryFactory', 'loginService'],
 
     mixins: [
         Mixin.getByName('listing'),
@@ -119,11 +119,12 @@ Component.register('wg-faq-list', {
 
             try {
                 const headers = {
-                    Authorization: `Bearer ${Shopware.Context.api.authToken.access}`,
+                    ...this.loginService.getHeader(),
                     Accept: 'application/json',
                 };
 
-                const response = await fetch('/api/wg-faq/export', { headers });
+                const apiPath = Shopware.Context.api.apiPath || '/api';
+                const response = await fetch(`${apiPath}/wg-faq/export`, { headers });
 
                 if (!response.ok) {
                     throw new Error(`Export fehlgeschlagen (HTTP ${response.status})`);
@@ -180,11 +181,12 @@ Component.register('wg-faq-list', {
                 }
 
                 const headers = {
-                    Authorization: `Bearer ${Shopware.Context.api.authToken.access}`,
+                    ...this.loginService.getHeader(),
                     'Content-Type': 'application/json',
                 };
 
-                const response = await fetch('/api/wg-faq/import', {
+                const apiPath = Shopware.Context.api.apiPath || '/api';
+                const response = await fetch(`${apiPath}/wg-faq/import`, {
                     method: 'POST',
                     headers,
                     body: JSON.stringify(parsed),

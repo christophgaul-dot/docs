@@ -31,6 +31,19 @@ class FaqExportImportController extends AbstractController
     )]
     public function export(Context $context): Response
     {
+        try {
+            return $this->doExport($context);
+        } catch (\Throwable $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Export fehlgeschlagen: ' . $e->getMessage(),
+                'trace' => $e->getFile() . ':' . $e->getLine(),
+            ], 500);
+        }
+    }
+
+    private function doExport(Context $context): Response
+    {
         $criteria = new Criteria();
         $criteria->addSorting(new FieldSorting('position', FieldSorting::ASCENDING));
         $criteria->addAssociation('translations');
@@ -40,42 +53,53 @@ class FaqExportImportController extends AbstractController
         // Resolve category names for readability
         $allCategoryIds = [];
         foreach ($faqs->getEntities() as $faq) {
-            if ($faq->getCategoryIds()) {
-                $allCategoryIds = array_merge($allCategoryIds, $faq->getCategoryIds());
+            $catIds = $faq->getCategoryIds();
+            if (\is_array($catIds)) {
+                $allCategoryIds = array_merge($allCategoryIds, $catIds);
             }
         }
-        $allCategoryIds = array_unique($allCategoryIds);
+        $allCategoryIds = array_unique(array_filter($allCategoryIds));
 
         $categoryNames = [];
         if (!empty($allCategoryIds)) {
-            $catCriteria = new Criteria($allCategoryIds);
-            $catCriteria->addAssociation('translations');
-            $categories = $this->categoryRepository->search($catCriteria, $context);
-            foreach ($categories->getEntities() as $cat) {
-                $categoryNames[$cat->getId()] = $cat->getTranslation('name') ?? $cat->getName();
+            try {
+                $catCriteria = new Criteria(array_values($allCategoryIds));
+                $catCriteria->addAssociation('translations');
+                $categories = $this->categoryRepository->search($catCriteria, $context);
+                foreach ($categories->getEntities() as $cat) {
+                    $name = $cat->getTranslation('name');
+                    if ($name === null) {
+                        $name = $cat->getName();
+                    }
+                    $categoryNames[$cat->getId()] = $name ?? '(unbekannt)';
+                }
+            } catch (\Throwable $e) {
+                // Category resolution failed - continue without names
             }
         }
 
         $exportData = [];
         foreach ($faqs->getEntities() as $faq) {
             $translations = [];
-            if ($faq->getTranslations()) {
-                foreach ($faq->getTranslations() as $translation) {
+            $faqTranslations = $faq->getTranslations();
+            if ($faqTranslations !== null) {
+                foreach ($faqTranslations as $translation) {
                     $translations[] = [
                         'languageId' => $translation->getLanguageId(),
-                        'question' => $translation->get('question'),
-                        'answer' => $translation->get('answer'),
-                        'seoUrl' => $translation->get('seoUrl'),
-                        'metaTitle' => $translation->get('metaTitle'),
-                        'metaDescription' => $translation->get('metaDescription'),
+                        'question' => $translation->getQuestion(),
+                        'answer' => $translation->getAnswer(),
+                        'seoUrl' => $translation->getSeoUrl(),
+                        'metaTitle' => $translation->getMetaTitle(),
+                        'metaDescription' => $translation->getMetaDescription(),
                     ];
                 }
             }
 
             // Build category info with names for readability
             $categoryInfo = [];
-            if ($faq->getCategoryIds()) {
-                foreach ($faq->getCategoryIds() as $catId) {
+            $catIds = $faq->getCategoryIds();
+            if (\is_array($catIds)) {
+                foreach ($catIds as $catId) {
                     $categoryInfo[] = [
                         'id' => $catId,
                         'name' => $categoryNames[$catId] ?? '(unbekannt)',

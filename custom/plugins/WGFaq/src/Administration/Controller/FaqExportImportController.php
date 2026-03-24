@@ -81,16 +81,17 @@ class FaqExportImportController extends AbstractController
         $exportData = [];
         foreach ($faqs->getEntities() as $faq) {
             $translations = [];
-            $faqTranslations = $faq->getTranslations();
+            /** @var \Shopware\Core\Framework\DataAbstractionLayer\EntityCollection|null $faqTranslations */
+            $faqTranslations = $faq->get('translations');
             if ($faqTranslations !== null) {
                 foreach ($faqTranslations as $translation) {
                     $translations[] = [
-                        'languageId' => $translation->getLanguageId(),
-                        'question' => $translation->getQuestion(),
-                        'answer' => $translation->getAnswer(),
-                        'seoUrl' => $translation->getSeoUrl(),
-                        'metaTitle' => $translation->getMetaTitle(),
-                        'metaDescription' => $translation->getMetaDescription(),
+                        'languageId' => $translation->get('languageId'),
+                        'question' => $translation->get('question'),
+                        'answer' => $translation->get('answer'),
+                        'seoUrl' => $translation->get('seoUrl'),
+                        'metaTitle' => $translation->get('metaTitle'),
+                        'metaDescription' => $translation->get('metaDescription'),
                     ];
                 }
             }

@@ -28,8 +28,9 @@
                 <sw-text-editor
                     :label="$tc('wg-faq.detail.labelAnswer')"
                     :placeholder="$tc('wg-faq.detail.placeholderAnswer')"
-                    :value="faq.answer"
-                    @update:value="faq.answer = $event">
+                    v-model:value="faq.answer"
+                    @input="onAnswerInput"
+                    @update:value="onAnswerInput">
                 </sw-text-editor>
 
                 <sw-number-field

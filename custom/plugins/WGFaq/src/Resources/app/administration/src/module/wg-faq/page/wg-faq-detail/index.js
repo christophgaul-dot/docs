@@ -95,5 +95,11 @@ Component.register('wg-faq-detail', {
         onMediaDropped(mediaItem) {
             this.onSetMediaItem({ targetId: mediaItem.id });
         },
+
+        onAnswerInput(value) {
+            if (value !== undefined && value !== null) {
+                this.faq.answer = value;
+            }
+        },
     },
 });

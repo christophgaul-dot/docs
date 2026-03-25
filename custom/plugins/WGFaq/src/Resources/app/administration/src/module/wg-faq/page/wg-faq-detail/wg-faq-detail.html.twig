@@ -25,13 +25,11 @@
                     required>
                 </sw-text-field>
 
-                <sw-text-editor
+                <sw-textarea-field
                     :label="$tc('wg-faq.detail.labelAnswer')"
                     :placeholder="$tc('wg-faq.detail.placeholderAnswer')"
-                    v-model:value="faq.answer"
-                    @input="onAnswerInput"
-                    @update:value="onAnswerInput">
-                </sw-text-editor>
+                    v-model="faq.answer">
+                </sw-textarea-field>
 
                 <sw-number-field
                     :label="$tc('wg-faq.detail.labelPosition')"

@@ -13,7 +13,7 @@
         "shopware/core": ">=6.6.0",
         "shopware/storefront": ">=6.6.0",
         "shopware/administration": ">=6.6.0",
-        "sprain/swiss-qr-bill": "^4.0"
+        "sprain/swiss-qr-bill": ">=4.0"
     },
     "autoload": {
         "psr-4": {

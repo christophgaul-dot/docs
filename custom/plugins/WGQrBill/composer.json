@@ -1,0 +1,34 @@
+{
+    "name": "wg/qr-bill",
+    "description": "Swiss QR-Rechnung on invoices, dunning documents and customer account for Shopware 6",
+    "version": "1.0.0",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Webagentur Gaul"
+        }
+    ],
+    "require": {
+        "shopware/core": ">=6.6.0",
+        "shopware/storefront": ">=6.6.0",
+        "shopware/administration": ">=6.6.0",
+        "sprain/swiss-qr-bill": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WG\\QrBill\\": "src/"
+        }
+    },
+    "extra": {
+        "shopware-plugin-class": "WG\\QrBill\\WGQrBill",
+        "label": {
+            "de-DE": "WG QR-Rechnung (Schweiz)",
+            "en-GB": "WG QR Bill (Switzerland)"
+        },
+        "description": {
+            "de-DE": "Schweizer QR-Rechnung auf Rechnungen, Mahnungen und im Kundenaccount. Inkl. 3-stufiges Mahnwesen.",
+            "en-GB": "Swiss QR bill on invoices, dunning documents and customer account. Incl. 3-level dunning system."
+        }
+    }
+}

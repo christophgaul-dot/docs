@@ -1,0 +1,7 @@
+{
+    "wg-qr-bill": {
+        "account": {
+            "downloadQrInvoice": "QR-Rechnung herunterladen"
+        }
+    }
+}

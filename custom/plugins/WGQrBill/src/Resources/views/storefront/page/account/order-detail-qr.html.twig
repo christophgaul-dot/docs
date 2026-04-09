@@ -1,0 +1,22 @@
+{% sw_extends '@Storefront/storefront/page/account/order/index.html.twig' %}
+
+{# Add QR invoice download button to order history #}
+{% block page_account_order_item_detail_action %}
+    {{ parent() }}
+
+    {% block wg_qr_bill_download_button %}
+        <a href="{{ path('frontend.account.invoice.qr.download', { orderId: order.id }) }}"
+           class="btn btn-outline-primary btn-sm mt-2"
+           target="_blank"
+           title="{{ 'wg-qr-bill.account.downloadQrInvoice'|trans|sw_sanitize }}">
+            <span class="icon icon-download me-1" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+            </span>
+            {{ "wg-qr-bill.account.downloadQrInvoice"|trans|sw_sanitize }}
+        </a>
+    {% endblock %}
+{% endblock %}

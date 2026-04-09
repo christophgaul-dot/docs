@@ -1,6 +1,6 @@
 {% sw_extends '@Framework/documents/invoice.html.twig' %}
 
-{% block document_line_items %}
+{% block document_base %}
     {{ parent() }}
 
     {% block wg_qr_bill_payment_slip %}

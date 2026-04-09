@@ -1,0 +1,130 @@
+{% sw_extends '@Framework/documents/invoice.html.twig' %}
+
+{% block document_body %}
+    {{ parent() }}
+
+    {% block wg_qr_bill_payment_slip %}
+        {# Swiss QR Payment Slip – appended after invoice content #}
+        {% if order is defined and order.orderCustomer is defined and order.billingAddress is defined %}
+            {% set customerNumber = order.orderCustomer.customerNumber|default('0') %}
+            {% set invoiceNumber = order.orderNumber|default('0') %}
+            {% set amount = order.amountTotal %}
+            {% set currency = order.currency.isoCode|default('CHF') %}
+            {% set billingAddress = order.billingAddress %}
+            {% set debtorName = billingAddress.firstName ~ ' ' ~ billingAddress.lastName %}
+            {% set debtorCountry = billingAddress.country.iso|default('CH') %}
+
+            {% if currency in ['CHF', 'EUR'] %}
+                {% set qrCodeDataUri = wg_qr_bill_svg(
+                    amount,
+                    currency,
+                    invoiceNumber,
+                    customerNumber,
+                    debtorName,
+                    billingAddress.street,
+                    billingAddress.zipcode,
+                    billingAddress.city,
+                    debtorCountry,
+                    order.salesChannelId
+                ) %}
+
+                {% set reference = wg_qr_reference(customerNumber, invoiceNumber) %}
+
+                {% if qrCodeDataUri %}
+                    <div style="page-break-before: always;"></div>
+
+                    <div class="wg-qr-payment-slip" style="
+                        border-top: 1px dashed #000;
+                        padding-top: 20px;
+                        margin-top: 20px;
+                        font-family: 'Liberation Sans', Arial, Helvetica, sans-serif;
+                        font-size: 10px;
+                    ">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                {# Empfangsschein (Receipt) – left column #}
+                                <td style="width: 38%; vertical-align: top; padding-right: 10px; border-right: 1px dashed #000;">
+                                    <div style="font-size: 11px; font-weight: bold; margin-bottom: 10px;">Empfangsschein</div>
+
+                                    <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Konto / Zahlbar an</div>
+                                    <div style="font-size: 9px; margin-bottom: 8px;">
+                                        {{ config('WGQrBill.config.qrIban') }}<br>
+                                        {{ config('WGQrBill.config.creditorName') }}<br>
+                                        {{ config('WGQrBill.config.creditorStreet') }}<br>
+                                        {{ config('WGQrBill.config.creditorZip') }} {{ config('WGQrBill.config.creditorCity') }}
+                                    </div>
+
+                                    <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Referenz</div>
+                                    <div style="font-size: 9px; margin-bottom: 8px;">{{ reference }}</div>
+
+                                    <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Zahlbar durch</div>
+                                    <div style="font-size: 9px; margin-bottom: 8px;">
+                                        {{ debtorName }}<br>
+                                        {{ billingAddress.street }}<br>
+                                        {{ billingAddress.zipcode }} {{ billingAddress.city }}
+                                    </div>
+
+                                    <table style="margin-top: 10px; width: 100%;">
+                                        <tr>
+                                            <td style="width: 50%;">
+                                                <div style="font-size: 7px; font-weight: bold;">Währung</div>
+                                                <div style="font-size: 9px;">{{ currency }}</div>
+                                            </td>
+                                            <td>
+                                                <div style="font-size: 7px; font-weight: bold;">Betrag</div>
+                                                <div style="font-size: 9px;">{{ amount|number_format(2, '.', "'") }}</div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <div style="margin-top: 15px; font-size: 7px; font-weight: bold; text-align: right;">Annahmestelle</div>
+                                </td>
+
+                                {# Zahlteil (Payment part) – right column #}
+                                <td style="width: 62%; vertical-align: top; padding-left: 15px;">
+                                    <div style="font-size: 11px; font-weight: bold; margin-bottom: 10px;">Zahlteil</div>
+
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="width: 170px; vertical-align: top;">
+                                                {# QR Code #}
+                                                <img src="{{ qrCodeDataUri }}" style="width: 150px; height: 150px;" alt="QR Code" />
+                                            </td>
+                                            <td style="vertical-align: top; padding-left: 10px;">
+                                                <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Währung</div>
+                                                <div style="font-size: 9px; margin-bottom: 5px;">{{ currency }}</div>
+
+                                                <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Betrag</div>
+                                                <div style="font-size: 9px; margin-bottom: 10px;">{{ amount|number_format(2, '.', "'") }}</div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <div style="margin-top: 10px;">
+                                        <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Konto / Zahlbar an</div>
+                                        <div style="font-size: 9px; margin-bottom: 8px;">
+                                            {{ config('WGQrBill.config.qrIban') }}<br>
+                                            {{ config('WGQrBill.config.creditorName') }}<br>
+                                            {{ config('WGQrBill.config.creditorStreet') }}<br>
+                                            {{ config('WGQrBill.config.creditorZip') }} {{ config('WGQrBill.config.creditorCity') }}
+                                        </div>
+
+                                        <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Referenz</div>
+                                        <div style="font-size: 9px; margin-bottom: 8px;">{{ reference }}</div>
+
+                                        <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Zahlbar durch</div>
+                                        <div style="font-size: 9px;">
+                                            {{ debtorName }}<br>
+                                            {{ billingAddress.street }}<br>
+                                            {{ billingAddress.zipcode }} {{ billingAddress.city }}
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    {% endblock %}
+{% endblock %}

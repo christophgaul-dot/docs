@@ -9,6 +9,7 @@ use WG\QrBill\Core\Document\DunningDocumentGenerator;
 use WG\QrBill\Core\Document\InvoiceQrSubscriber;
 use WG\QrBill\Core\Dunning\DunningDefinition;
 use WG\QrBill\Core\QrBill\QrBillGenerator;
+use WG\QrBill\Core\QrBill\QrBillTwigExtension;
 use WG\QrBill\Storefront\Controller\AccountInvoiceController;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
@@ -23,6 +24,13 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->args([
             new Reference('Shopware\Core\System\SystemConfig\SystemConfigService'),
         ]);
+
+    // Twig Extension for QR code generation in document templates
+    $services->set(QrBillTwigExtension::class)
+        ->args([
+            new Reference(QrBillGenerator::class),
+        ])
+        ->tag('twig.extension');
 
     // Invoice QR Subscriber (adds QR data to document templates)
     $services->set(InvoiceQrSubscriber::class)

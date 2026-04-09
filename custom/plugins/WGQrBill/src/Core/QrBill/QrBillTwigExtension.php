@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace WG\QrBill\Core\QrBill;
 
-use Shopware\Core\System\SystemConfig\SystemConfigService;
-use Sprain\SwissQrBill\QrBill;
-use Sprain\SwissQrBill\QrCode\QrCode;
+use Psr\Log\LoggerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
 class QrBillTwigExtension extends AbstractExtension
 {
     public function __construct(
-        private readonly QrBillGenerator $qrBillGenerator
+        private readonly QrBillGenerator $qrBillGenerator,
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -22,11 +21,14 @@ class QrBillTwigExtension extends AbstractExtension
         return [
             new TwigFunction('wg_qr_bill_svg', [$this, 'generateQrBillSvg'], ['is_safe' => ['html']]),
             new TwigFunction('wg_qr_reference', [$this, 'generateReference']),
+            new TwigFunction('wg_qr_bill_error', [$this, 'getLastError']),
         ];
     }
 
+    private string $lastError = '';
+
     /**
-     * Generate the QR code as SVG for embedding in invoice HTML.
+     * Generate the QR code as data URI for embedding in invoice HTML.
      */
     public function generateQrBillSvg(
         float $amount,
@@ -40,6 +42,8 @@ class QrBillTwigExtension extends AbstractExtension
         string $debtorCountry = 'CH',
         ?string $salesChannelId = null
     ): string {
+        $this->lastError = '';
+
         try {
             $qrBill = $this->qrBillGenerator->createQrBill(
                 $amount,
@@ -54,10 +58,25 @@ class QrBillTwigExtension extends AbstractExtension
                 $salesChannelId
             );
 
-            $qrCode = $qrBill->getQrCode();
+            // Validate QR bill before generating QR code
+            $violations = $qrBill->getViolations();
+            if ($violations->count() > 0) {
+                $errors = [];
+                foreach ($violations as $violation) {
+                    $errors[] = $violation->getMessage();
+                }
+                $this->lastError = implode('; ', $errors);
+                $this->logger->error('QR Bill validation failed: ' . $this->lastError);
+                return '';
+            }
 
-            return $qrCode->writeDataUri();
+            return $qrBill->getQrCode()->writeDataUri();
         } catch (\Throwable $e) {
+            $this->lastError = $e->getMessage();
+            $this->logger->error('QR Bill generation failed: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
             return '';
         }
     }
@@ -67,14 +86,27 @@ class QrBillTwigExtension extends AbstractExtension
      */
     public function generateReference(string $customerNumber, string $invoiceNumber): string
     {
-        $ref = $this->qrBillGenerator->generateQrrReference($customerNumber, $invoiceNumber);
+        try {
+            $ref = $this->qrBillGenerator->generateQrrReference($customerNumber, $invoiceNumber);
 
-        // Format as blocks: 2 + 5x5 digits
-        return substr($ref, 0, 2) . ' '
-            . substr($ref, 2, 5) . ' '
-            . substr($ref, 7, 5) . ' '
-            . substr($ref, 12, 5) . ' '
-            . substr($ref, 17, 5) . ' '
-            . substr($ref, 22, 5);
+            // Format as blocks: 2 + 5x5 digits
+            return substr($ref, 0, 2) . ' '
+                . substr($ref, 2, 5) . ' '
+                . substr($ref, 7, 5) . ' '
+                . substr($ref, 12, 5) . ' '
+                . substr($ref, 17, 5) . ' '
+                . substr($ref, 22, 5);
+        } catch (\Throwable $e) {
+            $this->logger->error('QR reference generation failed: ' . $e->getMessage());
+            return '';
+        }
+    }
+
+    /**
+     * Get the last error message (for debugging in templates).
+     */
+    public function getLastError(): string
+    {
+        return $this->lastError;
     }
 }

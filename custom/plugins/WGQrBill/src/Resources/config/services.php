@@ -29,6 +29,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $services->set(QrBillTwigExtension::class)
         ->args([
             new Reference(QrBillGenerator::class),
+            new Reference('logger'),
         ])
         ->tag('twig.extension');
 

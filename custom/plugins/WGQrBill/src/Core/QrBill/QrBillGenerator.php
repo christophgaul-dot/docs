@@ -116,8 +116,15 @@ class QrBillGenerator
             PaymentAmountInformation::create($currency, $amount)
         );
 
-        // Payment reference
+        // Payment reference – auto-detect IBAN type
+        $iban = $this->cleanIban($config['qrIban']);
         $referenceType = $config['referenceType'] ?? 'QRR';
+
+        // QRR requires QR-IBAN (positions 5-9 = 30000-31999)
+        // If normal IBAN is used, fall back to SCOR
+        if ($referenceType === 'QRR' && !$this->isQrIban($iban)) {
+            $referenceType = 'SCOR';
+        }
 
         if ($referenceType === 'QRR') {
             $reference = $this->generateQrrReference($customerNumber, $invoiceNumber);
@@ -219,6 +226,21 @@ class QrBillGenerator
         }
 
         return (string)((10 - $carry) % 10);
+    }
+
+    /**
+     * Check if IBAN is a QR-IBAN (positions 5-9 between 30000-31999).
+     */
+    private function isQrIban(string $iban): bool
+    {
+        $iban = str_replace(' ', '', $iban);
+        if (strlen($iban) < 9) {
+            return false;
+        }
+
+        $iid = (int)substr($iban, 4, 5);
+
+        return $iid >= 30000 && $iid <= 31999;
     }
 
     /**

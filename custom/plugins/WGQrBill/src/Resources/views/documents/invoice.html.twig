@@ -1,20 +1,28 @@
 {% sw_extends '@Framework/documents/invoice.html.twig' %}
 
-{% block document_body %}
+{% block document_line_items %}
     {{ parent() }}
 
     {% block wg_qr_bill_payment_slip %}
-        {# Swiss QR Payment Slip – appended after invoice content #}
-        {% if order is defined and order.orderCustomer is defined and order.billingAddress is defined %}
+        {# Swiss QR Payment Slip – appended after invoice line items #}
+        {% if order is defined and order.orderCustomer is defined %}
             {% set customerNumber = order.orderCustomer.customerNumber|default('0') %}
             {% set invoiceNumber = order.orderNumber|default('0') %}
             {% set amount = order.amountTotal %}
             {% set currency = order.currency.isoCode|default('CHF') %}
-            {% set billingAddress = order.billingAddress %}
-            {% set debtorName = billingAddress.firstName ~ ' ' ~ billingAddress.lastName %}
-            {% set debtorCountry = billingAddress.country.iso|default('CH') %}
 
-            {% if currency in ['CHF', 'EUR'] %}
+            {% if order.billingAddress is defined and order.billingAddress %}
+                {% set billingAddress = order.billingAddress %}
+            {% elseif order.addresses is defined and order.addresses|length > 0 %}
+                {% set billingAddress = order.addresses|first %}
+            {% else %}
+                {% set billingAddress = null %}
+            {% endif %}
+
+            {% if billingAddress and currency in ['CHF', 'EUR'] %}
+                {% set debtorName = billingAddress.firstName ~ ' ' ~ billingAddress.lastName %}
+                {% set debtorCountry = billingAddress.country.iso|default('CH') %}
+
                 {% set qrCodeDataUri = wg_qr_bill_svg(
                     amount,
                     currency,
@@ -30,13 +38,12 @@
 
                 {% set reference = wg_qr_reference(customerNumber, invoiceNumber) %}
 
-                {% if qrCodeDataUri %}
-                    <div style="page-break-before: always;"></div>
+                <div style="page-break-before: always;"></div>
 
+                {% if qrCodeDataUri %}
                     <div class="wg-qr-payment-slip" style="
                         border-top: 1px dashed #000;
                         padding-top: 20px;
-                        margin-top: 20px;
                         font-family: 'Liberation Sans', Arial, Helvetica, sans-serif;
                         font-size: 10px;
                     ">
@@ -87,7 +94,6 @@
                                     <table style="width: 100%; border-collapse: collapse;">
                                         <tr>
                                             <td style="width: 170px; vertical-align: top;">
-                                                {# QR Code #}
                                                 <img src="{{ qrCodeDataUri }}" style="width: 150px; height: 150px;" alt="QR Code" />
                                             </td>
                                             <td style="vertical-align: top; padding-left: 10px;">
@@ -95,7 +101,7 @@
                                                 <div style="font-size: 9px; margin-bottom: 5px;">{{ currency }}</div>
 
                                                 <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Betrag</div>
-                                                <div style="font-size: 9px; margin-bottom: 10px;">{{ amount|number_format(2, '.', "'") }}</div>
+                                                <div style="font-size: 9px;">{{ amount|number_format(2, '.', "'") }}</div>
                                             </td>
                                         </tr>
                                     </table>
@@ -122,6 +128,16 @@
                                 </td>
                             </tr>
                         </table>
+                    </div>
+                {% else %}
+                    {# QR code generation failed – show debug info #}
+                    <div style="padding: 20px; border: 2px solid red; margin: 20px; font-family: Arial; font-size: 12px;">
+                        <strong>QR-Rechnung konnte nicht generiert werden.</strong><br>
+                        {% set qrError = wg_qr_bill_error() %}
+                        {% if qrError %}
+                            Fehler: {{ qrError }}<br>
+                        {% endif %}
+                        Bitte prüfen Sie die Plugin-Einstellungen unter Einstellungen → Erweiterungen → WG QR-Rechnung.
                     </div>
                 {% endif %}
             {% endif %}

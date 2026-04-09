@@ -70,7 +70,7 @@ class QrBillTwigExtension extends AbstractExtension
                 return '';
             }
 
-            return $qrBill->getQrCode()->writeDataUri();
+            return $qrBill->getQrCode()->getDataUri();
         } catch (\Throwable $e) {
             $this->lastError = $e->getMessage();
             $this->logger->error('QR Bill generation failed: ' . $e->getMessage(), [

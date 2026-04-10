@@ -1,0 +1,7 @@
+{
+  "w-g-qr-bill": {
+    "file": "assets/w-g-qr-bill.js",
+    "isEntry": true,
+    "src": "w-g-qr-bill"
+  }
+}

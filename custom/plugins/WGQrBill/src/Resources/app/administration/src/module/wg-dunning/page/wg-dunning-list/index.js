@@ -41,7 +41,7 @@ Component.register('wg-dunning-list', {
         async loadDunnings() {
             this.isLoading = true;
             try {
-                const response = await this.httpClient.get('/wg-dunning/list', {
+                const response = await this.httpClient.get('/_action/wg-dunning/list', {
                     headers: this.headers,
                 });
                 this.dunnings = response.data.data || [];
@@ -62,7 +62,7 @@ Component.register('wg-dunning-list', {
 
             this.isCreating = true;
             try {
-                const response = await this.httpClient.post('/wg-dunning/create', {
+                const response = await this.httpClient.post('/_action/wg-dunning/create', {
                     orderId: this.createOrderId,
                 }, {
                     headers: this.headers,
@@ -94,7 +94,7 @@ Component.register('wg-dunning-list', {
 
         async onDownloadPdf(dunningId) {
             try {
-                const response = await this.httpClient.get(`/wg-dunning/${dunningId}/pdf`, {
+                const response = await this.httpClient.get(`/_action/wg-dunning/${dunningId}/pdf`, {
                     headers: {
                         Authorization: `Bearer ${Shopware.Context.api.authToken.access}`,
                     },

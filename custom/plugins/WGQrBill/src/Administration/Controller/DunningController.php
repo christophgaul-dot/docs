@@ -27,8 +27,8 @@ class DunningController extends AbstractController
     }
 
     #[Route(
-        path: '/api/wg-dunning/create',
-        name: 'api.wg_dunning.create',
+        path: '/api/_action/wg-dunning/create',
+        name: 'api.action.wg_dunning.create',
         methods: ['POST']
     )]
     public function createDunning(Request $request, Context $context): JsonResponse
@@ -71,8 +71,8 @@ class DunningController extends AbstractController
     }
 
     #[Route(
-        path: '/api/wg-dunning/{dunningId}/pdf',
-        name: 'api.wg_dunning.pdf',
+        path: '/api/_action/wg-dunning/{dunningId}/pdf',
+        name: 'api.action.wg_dunning.pdf',
         methods: ['GET']
     )]
     public function downloadDunningPdf(string $dunningId, Context $context): Response
@@ -93,8 +93,8 @@ class DunningController extends AbstractController
     }
 
     #[Route(
-        path: '/api/wg-dunning/list',
-        name: 'api.wg_dunning.list',
+        path: '/api/_action/wg-dunning/list',
+        name: 'api.action.wg_dunning.list',
         methods: ['GET']
     )]
     public function listDunnings(Context $context): JsonResponse

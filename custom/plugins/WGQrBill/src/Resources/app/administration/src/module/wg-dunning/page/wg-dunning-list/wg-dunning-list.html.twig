@@ -1,0 +1,101 @@
+<sw-page class="wg-dunning-list">
+    <template #smart-bar-header>
+        <h2>{{ $tc('wg-dunning.list.title') }}</h2>
+    </template>
+
+    <template #smart-bar-actions>
+        <sw-button variant="primary" @click="openCreateModal">
+            <sw-icon name="regular-plus" small></sw-icon>
+            {{ $tc('wg-dunning.list.buttonCreateDunning') }}
+        </sw-button>
+    </template>
+
+    <template #content>
+        {# Create Dunning Modal #}
+        <sw-modal
+            v-if="showCreateModal"
+            :title="$tc('wg-dunning.list.modalTitle')"
+            @modal-close="showCreateModal = false">
+
+            <p>{{ $tc('wg-dunning.list.modalDescription') }}</p>
+
+            <sw-text-field
+                :label="$tc('wg-dunning.list.labelOrderId')"
+                :placeholder="$tc('wg-dunning.list.placeholderOrderId')"
+                v-model="createOrderId">
+            </sw-text-field>
+
+            <template #modal-footer>
+                <sw-button variant="ghost" @click="showCreateModal = false">
+                    {{ $tc('wg-dunning.list.modalClose') }}
+                </sw-button>
+                <sw-button
+                    variant="primary"
+                    :isLoading="isCreating"
+                    :disabled="!createOrderId"
+                    @click="onCreateDunning">
+                    {{ $tc('wg-dunning.list.modalCreate') }}
+                </sw-button>
+            </template>
+        </sw-modal>
+
+        {# Dunning List #}
+        <sw-card :isLoading="isLoading">
+            <template v-if="dunnings.length > 0">
+                <table class="wg-dunning-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #d1d9e0; text-align: left;">
+                            <th style="padding: 8px 12px;">{{ $tc('wg-dunning.list.columnOrderNumber') }}</th>
+                            <th style="padding: 8px 12px;">{{ $tc('wg-dunning.list.columnCustomer') }}</th>
+                            <th style="padding: 8px 12px;">{{ $tc('wg-dunning.list.columnLevel') }}</th>
+                            <th style="padding: 8px 12px;">{{ $tc('wg-dunning.list.columnFee') }}</th>
+                            <th style="padding: 8px 12px;">{{ $tc('wg-dunning.list.columnTotal') }}</th>
+                            <th style="padding: 8px 12px;">{{ $tc('wg-dunning.list.columnDueDate') }}</th>
+                            <th style="padding: 8px 12px;">{{ $tc('wg-dunning.list.columnCreatedAt') }}</th>
+                            <th style="padding: 8px 12px;">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="dunning in dunnings"
+                            :key="dunning.id"
+                            style="border-bottom: 1px solid #e9ecef;">
+                            <td style="padding: 8px 12px; font-weight: 600;">
+                                {{ dunning.orderNumber || dunning.orderId.substring(0, 8) }}
+                            </td>
+                            <td style="padding: 8px 12px;">
+                                {{ dunning.customerName || '–' }}
+                            </td>
+                            <td style="padding: 8px 12px;">
+                                <sw-label :variant="dunning.level >= 3 ? 'danger' : dunning.level >= 2 ? 'warning' : 'info'" size="sm">
+                                    {{ getLevelLabel(dunning.level) }}
+                                </sw-label>
+                            </td>
+                            <td style="padding: 8px 12px;">
+                                {{ formatCurrency(dunning.fee) }}
+                            </td>
+                            <td style="padding: 8px 12px; font-weight: 600;">
+                                {{ formatCurrency(dunning.totalAmount) }}
+                            </td>
+                            <td style="padding: 8px 12px;">
+                                {{ formatDate(dunning.dueDate) }}
+                            </td>
+                            <td style="padding: 8px 12px;">
+                                {{ formatDate(dunning.createdAt) }}
+                            </td>
+                            <td style="padding: 8px 12px;">
+                                <sw-button size="small" variant="ghost" @click="onDownloadPdf(dunning.id)">
+                                    <sw-icon name="regular-download" small></sw-icon>
+                                    PDF
+                                </sw-button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
+            <template v-else>
+                <sw-empty-state :title="$tc('wg-dunning.list.noData')">
+                </sw-empty-state>
+            </template>
+        </sw-card>
+    </template>
+</sw-page>

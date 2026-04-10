@@ -7,6 +7,7 @@ namespace WG\QrBill\Administration\Controller;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,7 +21,8 @@ class DunningController extends AbstractController
 {
     public function __construct(
         private readonly DunningDocumentGenerator $dunningDocumentGenerator,
-        private readonly EntityRepository $dunningRepository
+        private readonly EntityRepository $dunningRepository,
+        private readonly EntityRepository $orderRepository
     ) {
     }
 
@@ -35,6 +37,18 @@ class DunningController extends AbstractController
 
         if (!$orderId) {
             return new JsonResponse(['success' => false, 'message' => 'orderId is required'], 400);
+        }
+
+        // Support order number lookup (e.g. "10000" instead of UUID)
+        if (!preg_match('/^[0-9a-f]{32}$/', str_replace('-', '', $orderId))) {
+            $criteria = new Criteria();
+            $criteria->addFilter(new EqualsFilter('orderNumber', $orderId));
+            $order = $this->orderRepository->search($criteria, $context)->first();
+
+            if (!$order) {
+                return new JsonResponse(['success' => false, 'message' => 'Bestellung "' . $orderId . '" nicht gefunden'], 404);
+            }
+            $orderId = $order->getId();
         }
 
         try {

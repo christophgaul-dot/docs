@@ -64,6 +64,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->args([
             new Reference(DunningDocumentGenerator::class),
             new Reference('wg_dunning.repository'),
+            new Reference('order.repository'),
         ])
         ->public()
         ->call('setContainer', [new Reference('service_container')]);

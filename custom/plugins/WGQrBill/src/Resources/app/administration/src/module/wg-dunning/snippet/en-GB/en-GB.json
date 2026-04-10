@@ -1,0 +1,34 @@
+{
+    "wg-dunning": {
+        "general": {
+            "title": "Dunning",
+            "description": "Manage dunning notices and QR invoices"
+        },
+        "list": {
+            "title": "Dunning Notices",
+            "columnOrderNumber": "Order No.",
+            "columnCustomer": "Customer",
+            "columnLevel": "Level",
+            "columnFee": "Fee",
+            "columnTotal": "Total Amount",
+            "columnDueDate": "Due Date",
+            "columnSentAt": "Sent At",
+            "columnCreatedAt": "Created At",
+            "buttonCreateDunning": "Create Dunning",
+            "buttonDownloadPdf": "Download PDF",
+            "labelOrderId": "Order No. or Order ID",
+            "placeholderOrderId": "e.g. 10000",
+            "modalTitle": "Create New Dunning Notice",
+            "modalDescription": "Select an order. The next dunning level will be determined automatically.",
+            "modalClose": "Cancel",
+            "modalCreate": "Create Dunning",
+            "successCreated": "Dunning level {level} created (fee: CHF {fee})",
+            "errorCreate": "Failed to create dunning notice",
+            "errorPdf": "Failed to generate PDF",
+            "level1": "1st reminder (free)",
+            "level2": "2nd reminder (CHF 10)",
+            "level3": "3rd reminder (CHF 20)",
+            "noData": "No dunning notices yet."
+        }
+    }
+}

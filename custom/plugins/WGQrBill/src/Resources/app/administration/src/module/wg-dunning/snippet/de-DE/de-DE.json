@@ -1,0 +1,34 @@
+{
+    "wg-dunning": {
+        "general": {
+            "title": "Mahnwesen",
+            "description": "Mahnungen verwalten und QR-Rechnungen erstellen"
+        },
+        "list": {
+            "title": "Mahnungen",
+            "columnOrderNumber": "Bestellnr.",
+            "columnCustomer": "Kunde",
+            "columnLevel": "Mahnstufe",
+            "columnFee": "Gebühr",
+            "columnTotal": "Gesamtbetrag",
+            "columnDueDate": "Fällig am",
+            "columnSentAt": "Versendet am",
+            "columnCreatedAt": "Erstellt am",
+            "buttonCreateDunning": "Mahnung erstellen",
+            "buttonDownloadPdf": "PDF herunterladen",
+            "labelOrderId": "Bestell-Nr. oder Bestell-ID",
+            "placeholderOrderId": "z.B. 10000",
+            "modalTitle": "Neue Mahnung erstellen",
+            "modalDescription": "Wählen Sie eine Bestellung aus. Die nächste Mahnstufe wird automatisch ermittelt.",
+            "modalClose": "Abbrechen",
+            "modalCreate": "Mahnung erstellen",
+            "successCreated": "Mahnung Stufe {level} erstellt (Gebühr: CHF {fee})",
+            "errorCreate": "Mahnung konnte nicht erstellt werden",
+            "errorPdf": "PDF konnte nicht generiert werden",
+            "level1": "1. Mahnung (kostenlos)",
+            "level2": "2. Mahnung (CHF 10)",
+            "level3": "3. Mahnung (CHF 20)",
+            "noData": "Noch keine Mahnungen erstellt."
+        }
+    }
+}

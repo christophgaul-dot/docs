@@ -5,8 +5,6 @@ const { Component, Mixin } = Shopware;
 Component.register('wg-dunning-list', {
     template,
 
-    inject: ['loginService'],
-
     mixins: [
         Mixin.getByName('notification'),
     ],
@@ -21,6 +19,20 @@ Component.register('wg-dunning-list', {
         };
     },
 
+    computed: {
+        httpClient() {
+            return Shopware.Application.getContainer('init').httpClient;
+        },
+
+        headers() {
+            return {
+                Accept: 'application/json',
+                Authorization: `Bearer ${Shopware.Context.api.authToken.access}`,
+                'Content-Type': 'application/json',
+            };
+        },
+    },
+
     created() {
         this.loadDunnings();
     },
@@ -29,14 +41,10 @@ Component.register('wg-dunning-list', {
         async loadDunnings() {
             this.isLoading = true;
             try {
-                const headers = {
-                    ...this.loginService.getHeader(),
-                    Accept: 'application/json',
-                };
-                const apiPath = Shopware.Context.api.apiPath || '/api';
-                const response = await fetch(`${apiPath}/wg-dunning/list`, { headers });
-                const data = await response.json();
-                this.dunnings = data.data || [];
+                const response = await this.httpClient.get('/wg-dunning/list', {
+                    headers: this.headers,
+                });
+                this.dunnings = response.data.data || [];
             } catch (error) {
                 this.createNotificationError({ message: error.message });
             } finally {
@@ -54,18 +62,13 @@ Component.register('wg-dunning-list', {
 
             this.isCreating = true;
             try {
-                const headers = {
-                    ...this.loginService.getHeader(),
-                    'Content-Type': 'application/json',
-                };
-                const apiPath = Shopware.Context.api.apiPath || '/api';
-                const response = await fetch(`${apiPath}/wg-dunning/create`, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify({ orderId: this.createOrderId }),
+                const response = await this.httpClient.post('/wg-dunning/create', {
+                    orderId: this.createOrderId,
+                }, {
+                    headers: this.headers,
                 });
 
-                const result = await response.json();
+                const result = response.data;
 
                 if (result.success) {
                     this.createNotificationSuccess({
@@ -91,18 +94,14 @@ Component.register('wg-dunning-list', {
 
         async onDownloadPdf(dunningId) {
             try {
-                const headers = {
-                    ...this.loginService.getHeader(),
-                };
-                const apiPath = Shopware.Context.api.apiPath || '/api';
-                const response = await fetch(`${apiPath}/wg-dunning/${dunningId}/pdf`, { headers });
+                const response = await this.httpClient.get(`/wg-dunning/${dunningId}/pdf`, {
+                    headers: {
+                        Authorization: `Bearer ${Shopware.Context.api.authToken.access}`,
+                    },
+                    responseType: 'blob',
+                });
 
-                if (!response.ok) {
-                    throw new Error(`PDF-Fehler (HTTP ${response.status})`);
-                }
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
+                const url = window.URL.createObjectURL(response.data);
                 const link = document.createElement('a');
                 link.href = url;
                 link.download = `Mahnung-${dunningId.substring(0, 8)}.pdf`;

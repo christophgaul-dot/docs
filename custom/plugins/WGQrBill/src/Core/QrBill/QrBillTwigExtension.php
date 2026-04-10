@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WG\QrBill\Core\QrBill;
 
 use Psr\Log\LoggerInterface;
+use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -12,7 +13,8 @@ class QrBillTwigExtension extends AbstractExtension
 {
     public function __construct(
         private readonly QrBillGenerator $qrBillGenerator,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly SystemConfigService $systemConfigService
     ) {
     }
 
@@ -22,7 +24,16 @@ class QrBillTwigExtension extends AbstractExtension
             new TwigFunction('wg_qr_bill_svg', [$this, 'generateQrBillSvg'], ['is_safe' => ['html']]),
             new TwigFunction('wg_qr_reference', [$this, 'generateReference']),
             new TwigFunction('wg_qr_bill_error', [$this, 'getLastError']),
+            new TwigFunction('wg_qr_config', [$this, 'getPluginConfig']),
         ];
+    }
+
+    /**
+     * Read a WGQrBill plugin config value from SystemConfigService.
+     */
+    public function getPluginConfig(string $key, ?string $salesChannelId = null): string
+    {
+        return (string) ($this->systemConfigService->get('WGQrBill.config.' . $key, $salesChannelId) ?? '');
     }
 
     private string $lastError = '';

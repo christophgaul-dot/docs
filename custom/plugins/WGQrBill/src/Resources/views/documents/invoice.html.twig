@@ -1,6 +1,6 @@
 {% sw_extends '@Framework/documents/invoice.html.twig' %}
 
-{% block document_base %}
+{% block document_body %}
     {{ parent() }}
 
     {% block wg_qr_bill_payment_slip %}
@@ -38,10 +38,9 @@
 
                 {% set reference = wg_qr_reference(customerNumber, invoiceNumber) %}
 
-                <div style="page-break-before: always;"></div>
-
                 {% if qrCodeDataUri %}
                     <div class="wg-qr-payment-slip" style="
+                        margin-top: 30px;
                         border-top: 1px dashed #000;
                         padding-top: 20px;
                         font-family: 'Liberation Sans', Arial, Helvetica, sans-serif;
@@ -55,10 +54,10 @@
 
                                     <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Konto / Zahlbar an</div>
                                     <div style="font-size: 9px; margin-bottom: 8px;">
-                                        {{ config('WGQrBill.config.qrIban') }}<br>
-                                        {{ config('WGQrBill.config.creditorName') }}<br>
-                                        {{ config('WGQrBill.config.creditorStreet') }}<br>
-                                        {{ config('WGQrBill.config.creditorZip') }} {{ config('WGQrBill.config.creditorCity') }}
+                                        {{ wg_qr_config('qrIban', order.salesChannelId) }}<br>
+                                        {{ wg_qr_config('creditorName', order.salesChannelId) }}<br>
+                                        {{ wg_qr_config('creditorStreet', order.salesChannelId) }}<br>
+                                        {{ wg_qr_config('creditorZip', order.salesChannelId) }} {{ wg_qr_config('creditorCity', order.salesChannelId) }}
                                     </div>
 
                                     <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Referenz</div>
@@ -79,7 +78,7 @@
                                             </td>
                                             <td>
                                                 <div style="font-size: 7px; font-weight: bold;">Betrag</div>
-                                                <div style="font-size: 9px;">{{ amount|number_format(2, '.', "'") }}</div>
+                                                <div style="font-size: 9px;">{{ amount|number_format(2, '.', '') }}</div>
                                             </td>
                                         </tr>
                                     </table>
@@ -101,7 +100,7 @@
                                                 <div style="font-size: 9px; margin-bottom: 5px;">{{ currency }}</div>
 
                                                 <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Betrag</div>
-                                                <div style="font-size: 9px;">{{ amount|number_format(2, '.', "'") }}</div>
+                                                <div style="font-size: 9px;">{{ amount|number_format(2, '.', '') }}</div>
                                             </td>
                                         </tr>
                                     </table>
@@ -109,10 +108,10 @@
                                     <div style="margin-top: 10px;">
                                         <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Konto / Zahlbar an</div>
                                         <div style="font-size: 9px; margin-bottom: 8px;">
-                                            {{ config('WGQrBill.config.qrIban') }}<br>
-                                            {{ config('WGQrBill.config.creditorName') }}<br>
-                                            {{ config('WGQrBill.config.creditorStreet') }}<br>
-                                            {{ config('WGQrBill.config.creditorZip') }} {{ config('WGQrBill.config.creditorCity') }}
+                                            {{ wg_qr_config('qrIban', order.salesChannelId) }}<br>
+                                            {{ wg_qr_config('creditorName', order.salesChannelId) }}<br>
+                                            {{ wg_qr_config('creditorStreet', order.salesChannelId) }}<br>
+                                            {{ wg_qr_config('creditorZip', order.salesChannelId) }} {{ wg_qr_config('creditorCity', order.salesChannelId) }}
                                         </div>
 
                                         <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Referenz</div>

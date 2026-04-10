@@ -30,6 +30,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->args([
             new Reference(QrBillGenerator::class),
             new Reference('logger'),
+            new Reference('Shopware\Core\System\SystemConfig\SystemConfigService'),
         ])
         ->tag('twig.extension');
 

@@ -6,7 +6,7 @@ const { Criteria } = Shopware.Data;
 Component.register('wg-faq-list', {
     template,
 
-    inject: ['repositoryFactory', 'loginService'],
+    inject: ['repositoryFactory'],
 
     mixins: [
         Mixin.getByName('listing'),
@@ -118,19 +118,17 @@ Component.register('wg-faq-list', {
             this.isExporting = true;
 
             try {
-                const headers = {
-                    ...this.loginService.getHeader(),
-                    Accept: 'application/json',
-                };
+                const httpClient = Shopware.Application.getContainer('init').httpClient;
+                const response = await httpClient.get('/wg-faq/export', {
+                    headers: {
+                        Accept: 'application/json',
+                        Authorization: 'Bearer ' + Shopware.Context.api.authToken.access,
+                    },
+                    responseType: 'blob',
+                });
 
-                const apiPath = Shopware.Context.api.apiPath || '/api';
-                const response = await fetch(`${apiPath}/wg-faq/export`, { headers });
+                const blob = response.data;
 
-                if (!response.ok) {
-                    throw new Error(`Export fehlgeschlagen (HTTP ${response.status})`);
-                }
-
-                const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 const today = new Date().toISOString().slice(0, 10);
@@ -180,19 +178,15 @@ Component.register('wg-faq-list', {
                     throw new Error('Ungültiges Format: "faqs" Array fehlt.');
                 }
 
-                const headers = {
-                    ...this.loginService.getHeader(),
-                    'Content-Type': 'application/json',
-                };
-
-                const apiPath = Shopware.Context.api.apiPath || '/api';
-                const response = await fetch(`${apiPath}/wg-faq/import`, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(parsed),
+                const httpClient = Shopware.Application.getContainer('init').httpClient;
+                const response = await httpClient.post('/wg-faq/import', parsed, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: 'Bearer ' + Shopware.Context.api.authToken.access,
+                    },
                 });
 
-                this.importResult = await response.json();
+                this.importResult = response.data;
 
                 if (this.importResult.success) {
                     this.createNotificationSuccess({

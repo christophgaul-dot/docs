@@ -1,7 +1,8 @@
 {
-  "w-g-qr-bill": {
-    "file": "assets/w-g-qr-bill.js",
-    "isEntry": true,
-    "src": "w-g-qr-bill"
+  "main.js": {
+    "file": "assets/w-g-qr-bill-CgQqNnn4.js",
+    "name": "w-g-qr-bill",
+    "src": "main.js",
+    "isEntry": true
   }
 }

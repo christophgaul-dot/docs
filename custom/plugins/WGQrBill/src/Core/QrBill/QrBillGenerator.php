@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WG\QrBill\Core\QrBill;
 
 use Shopware\Core\System\SystemConfig\SystemConfigService;
+use Sprain\SwissQrBill\DataGroup\Element\AdditionalInformation;
 use Sprain\SwissQrBill\DataGroup\Element\CombinedAddress;
 use Sprain\SwissQrBill\DataGroup\Element\CreditorInformation;
 use Sprain\SwissQrBill\DataGroup\Element\PaymentAmountInformation;
@@ -263,6 +264,11 @@ class QrBillGenerator
                 PaymentReference::create(PaymentReference::TYPE_NON)
             );
         }
+
+        // Additional information – invoice/dunning number visible on payment part
+        $qrBill->setAdditionalInformation(
+            AdditionalInformation::create('Rechnung-Nr.: ' . $invoiceNumber)
+        );
 
         // Debtor information (payer / Zahlungspflichtiger)
         $qrBill->setUltimateDebtor(

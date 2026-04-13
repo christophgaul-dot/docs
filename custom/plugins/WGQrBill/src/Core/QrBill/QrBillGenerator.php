@@ -69,7 +69,6 @@ class QrBillGenerator
         $tcPdf->AddPage();
 
         $output = new TcPdfOutput($qrBill, 'de', $tcPdf);
-        $output->setPrintable(false);
         $output->getPaymentPart();
 
         return $tcPdf->Output('', 'S');

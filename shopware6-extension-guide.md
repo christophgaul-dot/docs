@@ -513,8 +513,193 @@ php bin/console cache:clear
 
 Dann im Browser den Admin mit `Ctrl+Shift+R` hart neu laden.
 
+### 12.4 Vorkompilierte Bundles deployen (ohne Node.js auf dem Server)
+
+Auf Shared-Hosting (z.B. Timme) ist Node.js nicht verfügbar. Der Admin-Build muss lokal gemacht und das fertige Bundle ins Plugin eingecheckt werden.
+
+**Pfad für vorkompilierte Bundles:**
+```
+src/Resources/public/administration/
+├── .vite/
+│   ├── entrypoints.json    ← KRITISCH: muss richtiges Format haben!
+│   └── manifest.json
+└── assets/
+    └── plugin-name-HASH.js
+```
+
+`assets:install` kopiert diese Dateien automatisch nach `/public/bundles/pluginname/`.
+
+### 12.5 Das `entrypoints.json` Format-Problem (kritisch!)
+
+Das **PentatrionViteBundle** in Shopware 6.6+ erwartet `entrypoints.json` in einem **spezifischen Format**. Falsches Format = Bundle wird nicht geladen, Modul erscheint nicht im Admin-Menü.
+
+**❌ FALSCH** (Plugin lädt nicht, kein Fehler im Browser):
+```json
+{
+  "w-g-qr-bill": {
+    "js": [
+      "assets/w-g-qr-bill-HASH.js"
+    ]
+  }
+}
+```
+
+**✅ RICHTIG** (so wird das Bundle vom PentatrionViteBundle geladen):
+```json
+{
+  "base": "/bundles/pluginname/administration/",
+  "entryPoints": {
+    "plugin-name": {
+      "css": [],
+      "dynamic": [],
+      "js": [
+        "/bundles/pluginname/administration/assets/plugin-name-HASH.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}
+```
+
+**Wichtige Punkte:**
+- `base` muss mit `/bundles/<pluginname-lowercase>/administration/` matchen
+- `entryPoints.X.js` Pfade müssen **absolute** Pfade sein (mit führendem `/bundles/`), nicht relative
+- Der Plugin-Key in `entryPoints` ist der `technicalName` aus `plugins.json` (z.B. `w-g-qr-bill`)
+
+### 12.6 Admin-Modul Loading-Pipeline (Debug-Reihenfolge)
+
+Wenn das Modul nicht im Admin-Menü erscheint, prüfe in dieser Reihenfolge:
+
+1. **Plugin aktiv?**
+   ```bash
+   php bin/console plugin:list | grep MeinPlugin
+   ```
+   Sollte `Yes` für Active und Installed zeigen.
+
+2. **In `var/plugins.json` registriert?**
+   ```bash
+   grep -A10 MeinPlugin /web/public/var/plugins.json
+   ```
+   Sollte `entryFilePath: "Resources/app/administration/src/main.js"` enthalten.
+
+3. **Bundle-Files vorhanden?**
+   ```bash
+   ls /web/public/public/bundles/meinplugin/administration/assets/
+   ```
+   Sollte mind. eine `.js`-Datei enthalten.
+
+4. **Bundle per HTTP erreichbar?**
+   ```bash
+   curl -I http://shop.tld/bundles/meinplugin/administration/assets/X.js
+   ```
+   Sollte `HTTP 200` zurückgeben.
+
+5. **`entrypoints.json` im richtigen Format?** (siehe 12.5)
+   ```bash
+   cat /web/public/public/bundles/meinplugin/administration/.vite/entrypoints.json
+   ```
+   Vergleiche mit einem funktionierenden Plugin (z.B. WGFaq).
+
+6. **JS lädt im Browser?** (in der Admin-Browser-Console eingeben):
+   ```javascript
+   performance.getEntriesByType('resource').filter(r => r.name.includes('mein-plugin')).map(r => r.name)
+   ```
+   Leeres Array `[]` = JS wird nicht geladen → Punkt 5 prüfen.
+
+7. **Modul registriert?**
+   ```javascript
+   Shopware.Module.getModuleRegistry().has('mein-modul')
+   ```
+   `false` = JS hat einen Fehler vor `Module.register()`.
+
+### 12.7 Häufige Fehler bei Admin-Modulen
+
+| Symptom | Ursache & Lösung |
+|---|---|
+| Modul erscheint nicht im Menü | `entrypoints.json` hat falsches Format → siehe 12.5 |
+| `this.loginService.getHeader is not a function` | In Shopware 6.5+ deprecated → `Shopware.Application.getContainer('init').httpClient` mit `Authorization: 'Bearer ' + Shopware.Context.api.authToken.access` nutzen |
+| API-Endpunkt liefert 404 | Route-Name kollidiert mit Auto-Entity-Routes → `/api/_action/...` Prefix verwenden |
+| Bundle wird nach `assets:install` überschrieben | Source-Datei in `src/Resources/public/...` muss aktualisiert werden, nicht nur die Bundle-Datei |
+| Browser-Cache zeigt alte Version | Hash-Dateinamen verwenden (`xxx-CgQqNnn4.js`), nicht generische (`xxx.js`) — und Inkognito-Fenster zum Testen |
+| `loginService` in einem Plugin geht, im anderen nicht | Versionsabhängig — neue Plugins immer mit `httpClient` schreiben |
+
+### 12.8 API-Routen: Konflikt mit Auto-Entity-Routen vermeiden
+
+Wenn das Plugin eine eigene Entity hat (z.B. `wg_dunning`), generiert Shopware automatisch CRUD-Routen:
+- `GET /api/wg-dunning{path}` → `api.wg_dunning.list`
+- `POST /api/wg-dunning{path}` → `api.wg_dunning.create`
+
+Diese **kollidieren mit gleichnamigen Custom-Controller-Routen**! Custom-Controller-Routen müssen darum den Shopware-Konvention-Prefix `/_action/` verwenden:
+
+```php
+#[Route(
+    path: '/api/_action/wg-dunning/list',         // ← _action im Pfad
+    name: 'api.action.wg_dunning.list',           // ← .action im Namen
+    methods: ['GET']
+)]
+public function listDunnings(): JsonResponse { ... }
+```
+
+Im Admin-JS:
+```javascript
+this.httpClient.get('/_action/wg-dunning/list', { headers: this.authHeaders })
+```
+
+### 12.9 httpClient statt loginService.getHeader
+
+`loginService.getHeader()` ist in Shopware 6.5+ deprecated. Modernes Pattern:
+
+```javascript
+const { Component, Mixin } = Shopware;
+
+Component.register('mein-list', {
+    template,
+    mixins: [Mixin.getByName('notification')],
+
+    computed: {
+        httpClient() {
+            return Shopware.Application.getContainer('init').httpClient;
+        },
+        authHeaders() {
+            return {
+                Accept: 'application/json',
+                Authorization: 'Bearer ' + Shopware.Context.api.authToken.access,
+                'Content-Type': 'application/json',
+            };
+        },
+    },
+
+    methods: {
+        async loadData() {
+            const response = await this.httpClient.get('/_action/mein-endpoint', {
+                headers: this.authHeaders,
+            });
+            this.items = response.data.data;
+        },
+
+        async downloadPdf(id) {
+            const response = await this.httpClient.get(`/_action/mein-endpoint/${id}/pdf`, {
+                headers: { Authorization: 'Bearer ' + Shopware.Context.api.authToken.access },
+                responseType: 'blob',
+            });
+            // ... blob-Download-Logik
+        },
+    },
+});
+```
+
 ---
 
-*Stand: März 2026 | Shopware 6.6.x | ThemeWare Modern Pro 4.2.x*
+*Stand: April 2026 | Shopware 6.6.x | ThemeWare Modern Pro 4.2.x*
 
 **— Webagentur Gaul | webagentur-gaul.de —**

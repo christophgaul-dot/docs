@@ -13,7 +13,8 @@
         "shopware/core": ">=6.6.0",
         "shopware/storefront": ">=6.6.0",
         "shopware/administration": ">=6.6.0",
-        "sprain/swiss-qr-bill": ">=4.0"
+        "sprain/swiss-qr-bill": ">=4.0",
+        "tecnickcom/tcpdf": "^6.11"
     },
     "autoload": {
         "psr-4": {

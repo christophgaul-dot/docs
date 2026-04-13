@@ -49,7 +49,13 @@ class InvoiceQrSubscriber implements EventSubscriberInterface
         }
 
         $customerNumber = $orderCustomer->getCustomerNumber() ?? '0';
-        $invoiceNumber = $order->getOrderNumber() ?? '0';
+        // Prefer the invoice document number over the order number
+        $invoiceNumber = $parameters['config']['documentNumber']
+            ?? ($parameters['config']->getDocumentNumber ?? null)
+            ?? $order->getOrderNumber() ?? '0';
+        if (is_object($invoiceNumber) && method_exists($invoiceNumber, 'getDocumentNumber')) {
+            $invoiceNumber = $invoiceNumber->getDocumentNumber();
+        }
         $amount = $order->getAmountTotal();
         $currency = $order->getCurrency()?->getIsoCode() ?? 'CHF';
 

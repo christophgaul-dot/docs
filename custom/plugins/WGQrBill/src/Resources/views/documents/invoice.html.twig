@@ -7,7 +7,7 @@
         {# Swiss QR Payment Slip – appended after invoice line items #}
         {% if order is defined and order.orderCustomer is defined %}
             {% set customerNumber = order.orderCustomer.customerNumber|default('0') %}
-            {% set invoiceNumber = order.orderNumber|default('0') %}
+            {% set invoiceNumber = (config is defined and config.documentNumber) ? config.documentNumber : order.orderNumber|default('0') %}
             {% set amount = order.amountTotal %}
             {% set currency = order.currency.isoCode|default('CHF') %}
 

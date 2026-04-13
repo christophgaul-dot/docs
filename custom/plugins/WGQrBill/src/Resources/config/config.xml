@@ -64,7 +64,7 @@
             <name>referenceType</name>
             <label>Referenz-Typ</label>
             <label lang="en-GB">Reference type</label>
-            <helpText>QRR: QR-Referenz (27 Ziffern, benötigt QR-IBAN). SCOR: Creditor Reference (ISO 11649, mit normaler IBAN).</helpText>
+            <helpText>QRR: QR-Referenz (27 Ziffern, benötigt QR-IBAN). SCOR: Creditor Reference (ISO 11649, mit normaler IBAN). NON: keine Referenz, Zuordnung nur über Rechnungs-Nr. im Verwendungszweck.</helpText>
             <defaultValue>QRR</defaultValue>
             <options>
                 <option>
@@ -74,6 +74,10 @@
                 <option>
                     <id>SCOR</id>
                     <name>Creditor Reference (SCOR)</name>
+                </option>
+                <option>
+                    <id>NON</id>
+                    <name>Keine Referenz (NON)</name>
                 </option>
             </options>
         </input-field>

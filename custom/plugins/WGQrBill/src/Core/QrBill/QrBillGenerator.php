@@ -75,6 +75,123 @@ class QrBillGenerator
     }
 
     /**
+     * Generate a complete dunning PDF with letter content + QR payment slip.
+     */
+    public function generateDunningPdf(
+        int $level,
+        float $orderAmount,
+        float $fee,
+        float $totalAmount,
+        string $currency,
+        string $invoiceNumber,
+        string $customerNumber,
+        string $debtorName,
+        string $debtorStreet,
+        string $debtorZip,
+        string $debtorCity,
+        string $debtorCountry,
+        \DateTimeInterface $dueDate,
+        ?string $salesChannelId = null
+    ): string {
+        $qrBill = $this->createQrBill(
+            $totalAmount,
+            $currency,
+            $invoiceNumber,
+            $customerNumber,
+            $debtorName,
+            $debtorStreet,
+            $debtorZip,
+            $debtorCity,
+            $debtorCountry,
+            $salesChannelId
+        );
+
+        $config = $this->getConfig($salesChannelId);
+
+        $tcPdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8');
+        $tcPdf->setPrintHeader(false);
+        $tcPdf->setPrintFooter(false);
+        $tcPdf->SetMargins(20, 20, 20);
+        $tcPdf->SetAutoPageBreak(false, 0);
+        $tcPdf->AddPage();
+
+        // Sender (small line above recipient)
+        $tcPdf->SetFont('helvetica', '', 8);
+        $senderLine = $config['creditorName'] . ' · ' . $config['creditorStreet'] . ' · '
+            . $config['creditorZip'] . ' ' . $config['creditorCity'];
+        $tcPdf->SetXY(20, 50);
+        $tcPdf->Cell(100, 4, $senderLine, 'B', 1, 'L');
+
+        // Recipient address
+        $tcPdf->SetFont('helvetica', '', 11);
+        $tcPdf->SetXY(20, 56);
+        $tcPdf->MultiCell(80, 5, $debtorName . "\n" . $debtorStreet . "\n" . $debtorZip . ' ' . $debtorCity, 0, 'L');
+
+        // Date right-aligned
+        $tcPdf->SetFont('helvetica', '', 10);
+        $tcPdf->SetXY(140, 56);
+        $tcPdf->Cell(50, 5, $config['creditorCity'] . ', ' . (new \DateTime())->format('d.m.Y'), 0, 1, 'R');
+
+        // Subject
+        $tcPdf->SetFont('helvetica', 'B', 13);
+        $tcPdf->SetXY(20, 95);
+        $subject = $level === 1 ? 'Zahlungserinnerung'
+            : ($level === 2 ? '2. Mahnung' : 'Letzte Mahnung');
+        $tcPdf->Cell(0, 7, $subject . ' zur Rechnung Nr. ' . $invoiceNumber, 0, 1, 'L');
+
+        // Salutation
+        $tcPdf->SetFont('helvetica', '', 10);
+        $tcPdf->SetXY(20, 108);
+        $tcPdf->Cell(0, 5, 'Sehr geehrte Damen und Herren', 0, 1, 'L');
+
+        // Body text per level
+        $bodyTexts = [
+            1 => "vermutlich ist es Ihrer Aufmerksamkeit entgangen, dass die untenstehende Rechnung noch offen ist. Wir bitten Sie, den Betrag bis zum {dueDate} auf unser Konto zu überweisen.\n\nFalls sich Ihre Zahlung mit diesem Schreiben gekreuzt hat, betrachten Sie diese Erinnerung bitte als gegenstandslos.",
+            2 => "trotz unserer Zahlungserinnerung haben wir bisher keinen Zahlungseingang feststellen können. Wir bitten Sie nun dringend, den ausstehenden Betrag inkl. Mahngebühr bis zum {dueDate} zu begleichen.",
+            3 => "trotz mehrfacher Mahnung ist Ihre Rechnung weiterhin offen. Bitte begleichen Sie den Gesamtbetrag inkl. Mahngebühren bis spätestens {dueDate}. Andernfalls sehen wir uns gezwungen, weitere rechtliche Schritte einzuleiten.",
+        ];
+        $body = str_replace('{dueDate}', $dueDate->format('d.m.Y'), $bodyTexts[$level] ?? $bodyTexts[3]);
+
+        $tcPdf->SetXY(20, 118);
+        $tcPdf->MultiCell(170, 5, $body, 0, 'L');
+
+        // Amount table
+        $tableY = $tcPdf->GetY() + 8;
+        $tcPdf->SetXY(20, $tableY);
+        $tcPdf->SetFont('helvetica', 'B', 10);
+        $tcPdf->Cell(110, 7, 'Position', 'B', 0, 'L');
+        $tcPdf->Cell(60, 7, 'Betrag (' . $currency . ')', 'B', 1, 'R');
+
+        $tcPdf->SetFont('helvetica', '', 10);
+        $tcPdf->SetX(20);
+        $tcPdf->Cell(110, 6, 'Rechnung Nr. ' . $invoiceNumber, 0, 0, 'L');
+        $tcPdf->Cell(60, 6, number_format($orderAmount, 2, '.', "'"), 0, 1, 'R');
+
+        if ($fee > 0) {
+            $tcPdf->SetX(20);
+            $tcPdf->Cell(110, 6, 'Mahngebühr', 0, 0, 'L');
+            $tcPdf->Cell(60, 6, number_format($fee, 2, '.', "'"), 0, 1, 'R');
+        }
+
+        $tcPdf->SetX(20);
+        $tcPdf->SetFont('helvetica', 'B', 10);
+        $tcPdf->Cell(110, 7, 'Gesamtbetrag', 'T', 0, 'L');
+        $tcPdf->Cell(60, 7, number_format($totalAmount, 2, '.', "'"), 'T', 1, 'R');
+
+        // Closing
+        $tcPdf->Ln(8);
+        $tcPdf->SetFont('helvetica', '', 10);
+        $tcPdf->SetX(20);
+        $tcPdf->MultiCell(170, 5, "Bitte verwenden Sie für die Zahlung den unten beigefügten QR-Zahlschein.\n\nFreundliche Grüsse\n" . $config['creditorName'], 0, 'L');
+
+        // QR payment slip at bottom of A4
+        $output = new TcPdfOutput($qrBill, 'de', $tcPdf);
+        $output->getPaymentPart();
+
+        return $tcPdf->Output('', 'S');
+    }
+
+    /**
      * Create a QR Bill object with all payment data.
      */
     public function createQrBill(

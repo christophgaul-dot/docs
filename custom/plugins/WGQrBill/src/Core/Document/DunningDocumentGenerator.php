@@ -107,7 +107,10 @@ class DunningDocumentGenerator
         $invoiceNumber = $order->getOrderNumber() ?? '0';
         $currency = $order->getCurrency()?->getIsoCode() ?? 'CHF';
 
-        return $this->qrBillGenerator->generateQrBillPdf(
+        return $this->qrBillGenerator->generateDunningPdf(
+            $dunning->getLevel(),
+            $order->getAmountTotal(),
+            $dunning->getFee(),
             $dunning->getTotalAmount(),
             $currency,
             $invoiceNumber,
@@ -117,6 +120,7 @@ class DunningDocumentGenerator
             $billingAddress->getZipcode(),
             $billingAddress->getCity(),
             $billingAddress->getCountry()?->getIso() ?? 'CH',
+            $dunning->getDueDate() ?? new \DateTimeImmutable(),
             $order->getSalesChannelId()
         );
     }

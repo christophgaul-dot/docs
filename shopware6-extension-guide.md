@@ -700,6 +700,147 @@ Component.register('mein-list', {
 
 ---
 
+## 13. Dokument-Templates (Rechnungen, Mahnungen, PDFs)
+
+### 13.1 Block-Hierarchie in Document-Templates
+
+Shopware-Document-Templates haben eine klare Hierarchie. Wer den falschen Block überschreibt, fügt Inhalt **außerhalb** der HTML-Struktur ein → leere Seiten oder broken layout.
+
+| Block | Position | Zweck |
+|---|---|---|
+| `document_base` | **Outer wrapper** (`<html>`, `<head>`, `<body>`, `<footer>`) | Komplette PDF-Struktur — **nicht überschreiben für Custom Content!** |
+| `document_body` | Innerhalb `<body>`, vor Footer | **Hier eigenen Content einfügen** |
+| `document_header` | Logo + Firmendaten oben | Standardmäßig aus `document_base_config` |
+| `document_footer` | Fußzeile mit Bankdaten etc. | Standardmäßig aus `document_base_config` |
+
+**❌ FALSCH** — fügt Content nach `</html>` ein, erzeugt 4-6 leere Seiten:
+```twig
+{% block document_base %}
+    {{ parent() }}
+    <div>Mein Custom Content</div>   {# außerhalb des Dokuments! #}
+{% endblock %}
+```
+
+**✅ RICHTIG** — fügt Content innerhalb des Dokuments ein:
+```twig
+{% block document_body %}
+    {{ parent() }}
+    <div>Mein Custom Content</div>
+{% endblock %}
+```
+
+### 13.2 Plugin-SystemConfig in Document-Templates lesen
+
+**Falle:** In Document-Templates gibt es zwei verschiedene `config()`-Funktionen mit **unterschiedlicher Semantik**:
+
+| Aufruf | Quelle | Ergebnis |
+|---|---|---|
+| `{{ config('MeinPlugin.config.key') }}` | `document_base_config` Tabelle (NICHT Plugin-Config!) | Liefert oft `null` oder Default `"Example Company"` |
+| `{{ system_config('MeinPlugin.config.key') }}` | Plugin-SystemConfig (richtig) | Liefert tatsächlichen Plugin-Wert |
+
+**Aber:** `system_config()` ist nicht überall verfügbar. Robuster Ansatz: **Eigene Twig-Funktion** in der Plugin-Twig-Extension:
+
+```php
+// QrBillTwigExtension.php
+class QrBillTwigExtension extends AbstractExtension
+{
+    public function __construct(
+        private readonly SystemConfigService $systemConfigService
+    ) {}
+
+    public function getFunctions(): array
+    {
+        return [
+            new TwigFunction('wg_qr_config', [$this, 'getPluginConfig']),
+        ];
+    }
+
+    public function getPluginConfig(string $key, ?string $salesChannelId = null): string
+    {
+        return (string) ($this->systemConfigService->get(
+            'MeinPlugin.config.' . $key,
+            $salesChannelId
+        ) ?? '');
+    }
+}
+```
+
+Im Template:
+```twig
+{{ wg_qr_config('creditorName', order.salesChannelId) }}
+```
+
+### 13.3 Rechnungs-Header zeigt "Example Company" trotz korrekter Plugin-Config
+
+Der **Rechnungskopf/Footer** zeigt nicht die Plugin-Config, sondern die **Document-Konfiguration**:
+
+→ Admin → **Einstellungen → Shop → Dokumente → Rechnung** → "Geschäftseinstellungen" Card
+
+Dort müssen alle Felder ausgefüllt werden (Firmenname, Adresse, Bank, USt-Nr., Geschäftsführer, etc.). Diese Daten werden von Shopware-Core ins Header- und Footer-HTML eingebunden — unabhängig von Plugin-Code.
+
+### 13.4 Generierte PDFs sind gecacht
+
+Sobald ein Dokument (Rechnung, Mahnung) generiert wurde, wird die PDF-Datei **dauerhaft gespeichert**. Jeder weitere Download liefert die alte Version — Template-Änderungen werden nicht sichtbar.
+
+**Lösung:** Eine **neue** Rechnung erstellen (für dieselbe Bestellung möglich, oder neue Test-Bestellung).
+
+Im Admin: Bestellung öffnen → Tab "Dokumente" → "Rechnung erstellen" Button → die **letzte** Rechnung in der Liste herunterladen.
+
+### 13.5 DomPDF Limitierungen (Shopware-Standard PDF-Renderer)
+
+| Problem | Ursache | Lösung |
+|---|---|---|
+| Logo erscheint als leeres Kästchen | DomPDF unterstützt nur PNG/JPG | Logo als PNG hochladen (kein SVG/WebP) |
+| Logo-Datei nicht gefunden | DomPDF lädt Bilder via `APP_URL` per HTTP/S | `APP_URL` muss auf öffentliche Domain zeigen, nicht `127.0.0.1` |
+| Logo lädt nicht obwohl URL korrekt | Server kann sich selbst nicht per HTTPS erreichen (Loopback-Problem auf Shared Hosting) | Logo lokal verfügbar machen, ggf. DomPDF `chroot` setzen |
+| Leerzeichen im Bilddateinamen verursachen 404 | URL-Encoding-Probleme | Dateinamen ohne Leerzeichen verwenden |
+| `page-break-before: always` erzeugt leere Folgeseite | DomPDF interpretiert page-break vor leerem Content | Page-break weglassen oder bedingt einfügen |
+
+### 13.6 APP_URL auf Shared Hosting
+
+Auf vielen Shared-Hostings kann der Server **keine HTTPS-Requests zu sich selbst** machen (z.B. wegen fehlender DNS-Auflösung im PHP-Container).
+
+Test:
+```bash
+php -r "echo @file_get_contents('https://www.shop.tld/favicon.ico', false, null, 0, 4) ? 'OK' : 'FAIL'; echo PHP_EOL;"
+```
+
+Wenn `FAIL` → DomPDF kann keine Logos via HTTP laden. Workarounds:
+1. APP_URL trotzdem korrekt setzen (für externe Verlinkung)
+2. Wichtige Bilder (Logo) möglichst klein und im PNG-Format
+3. Falls Logo nicht zwingend → Document-Konfiguration ohne Logo nutzen
+
+**Wichtig:** APP_URL steht in **`.env.local`**, nicht in `.env`! Die `.env` enthält oft Platzhalter (`http://127.0.0.1:8000`).
+
+### 13.7 Custom-Twig-Funktion für QR-Code-Generierung
+
+QR-Codes (z.B. Schweizer QR-Rechnung) als Data-URI im HTML einbetten — nicht als externe URL. Dann braucht DomPDF keine HTTP-Requests:
+
+```php
+public function generateQrBillSvg(...): string
+{
+    $qrBill = $this->createQrBill(...);
+    return $qrBill->getQrCode()->getDataUri();  // data:image/svg+xml;base64,...
+}
+```
+
+Im Template:
+```twig
+<img src="{{ wg_qr_bill_svg(amount, currency, ...) }}" alt="QR Code" />
+```
+
+> **Hinweis:** SVG via Data-URI funktioniert auch in DomPDF, weil das SVG inline geparst wird (kein HTTP-Request).
+
+### 13.8 Document-Template Debug-Strategien
+
+1. **PDF zu groß / leere Seiten?** → Falscher Block (siehe 13.1) oder unbedingter `page-break`
+2. **"Example Company" im PDF?** → Document-Konfiguration nicht ausgefüllt (siehe 13.3)
+3. **Plugin-Config-Wert nicht im PDF?** → `config()` liefert document_base_config — eigene Twig-Funktion bauen (siehe 13.2)
+4. **Bilder fehlen?** → DomPDF-Format-Limitierung oder APP_URL falsch (siehe 13.5/13.6)
+5. **Änderungen nicht sichtbar?** → PDF gecacht — neue Rechnung erstellen (siehe 13.4)
+
+---
+
 *Stand: April 2026 | Shopware 6.6.x | ThemeWare Modern Pro 4.2.x*
 
 **— Webagentur Gaul | webagentur-gaul.de —**

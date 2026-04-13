@@ -265,9 +265,17 @@ class QrBillGenerator
             );
         }
 
-        // Additional information – invoice/dunning number visible on payment part
+        // Additional information – invoice number visible on payment part + Swico S1 bill information
+        $billInfo = '//S1'
+            . '/10/' . preg_replace('/[^A-Z0-9]/i', '', $invoiceNumber)
+            . '/11/' . (new \DateTime())->format('ymd');
+        if (!empty($config['creditorUid'])) {
+            $billInfo .= '/30/' . preg_replace('/[^0-9]/', '', $config['creditorUid']);
+        }
+        $billInfo .= '/40/0:' . $config['paymentTermDays'];
+
         $qrBill->setAdditionalInformation(
-            AdditionalInformation::create('Rechnung-Nr.: ' . $invoiceNumber)
+            AdditionalInformation::create('Rechnung-Nr.: ' . $invoiceNumber, $billInfo)
         );
 
         // Debtor information (payer / Zahlungspflichtiger)
@@ -410,6 +418,8 @@ class QrBillGenerator
             'creditorCity' => $this->systemConfigService->get('WGQrBill.config.creditorCity', $salesChannelId) ?? '',
             'creditorCountry' => $this->systemConfigService->get('WGQrBill.config.creditorCountry', $salesChannelId) ?? 'CH',
             'referenceType' => $this->systemConfigService->get('WGQrBill.config.referenceType', $salesChannelId) ?? 'QRR',
+            'creditorUid' => $this->systemConfigService->get('WGQrBill.config.creditorUid', $salesChannelId) ?? '',
+            'paymentTermDays' => (int)($this->systemConfigService->get('WGQrBill.config.paymentTermDays', $salesChannelId) ?? 14),
         ];
     }
 }

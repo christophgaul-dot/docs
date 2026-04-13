@@ -77,6 +77,22 @@
                 </option>
             </options>
         </input-field>
+
+        <input-field type="text">
+            <name>creditorUid</name>
+            <label>UID-Nummer (MWST)</label>
+            <label lang="en-GB">VAT UID</label>
+            <helpText>Schweizer UID (z.B. CHE-388.974.167). Wird als Bill Information (Swico S1) im QR-Code hinterlegt.</helpText>
+            <placeholder>CHE-388.974.167</placeholder>
+        </input-field>
+
+        <input-field type="int">
+            <name>paymentTermDays</name>
+            <label>Zahlungsziel (Tage)</label>
+            <label lang="en-GB">Payment term (days)</label>
+            <helpText>Zahlungsfrist für die Rechnung in Tagen (wird als Bill Information im QR-Code hinterlegt).</helpText>
+            <defaultValue>14</defaultValue>
+        </input-field>
     </card>
 
     <card>

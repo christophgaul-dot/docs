@@ -25,6 +25,7 @@ class QrBillTwigExtension extends AbstractExtension
             new TwigFunction('wg_qr_reference', [$this, 'generateReference']),
             new TwigFunction('wg_qr_bill_error', [$this, 'getLastError']),
             new TwigFunction('wg_qr_config', [$this, 'getPluginConfig']),
+            new TwigFunction('wg_qr_reference_auto', [$this, 'generateReferenceAuto']),
         ];
     }
 
@@ -119,5 +120,29 @@ class QrBillTwigExtension extends AbstractExtension
     public function getLastError(): string
     {
         return $this->lastError;
+    }
+
+    /**
+     * Generate a reference string that matches the configured referenceType.
+     * Returns empty string for NON.
+     */
+    public function generateReferenceAuto(string $customerNumber, string $invoiceNumber, ?string $salesChannelId = null): string
+    {
+        $type = (string) ($this->systemConfigService->get('WGQrBill.config.referenceType', $salesChannelId) ?? 'QRR');
+
+        if ($type === 'NON') {
+            return '';
+        }
+
+        if ($type === 'SCOR') {
+            try {
+                return $this->qrBillGenerator->generateScorReference($customerNumber, $invoiceNumber);
+            } catch (\Throwable $e) {
+                $this->logger->error('SCOR reference generation failed: ' . $e->getMessage());
+                return '';
+            }
+        }
+
+        return $this->generateReference($customerNumber, $invoiceNumber);
     }
 }

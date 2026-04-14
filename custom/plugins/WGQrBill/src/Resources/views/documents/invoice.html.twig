@@ -36,7 +36,9 @@
                     order.salesChannelId
                 ) %}
 
-                {% set reference = wg_qr_reference(customerNumber, invoiceNumber) %}
+                {% set referenceType = wg_qr_config('referenceType', order.salesChannelId)|default('QRR') %}
+                {% set reference = wg_qr_reference_auto(customerNumber, invoiceNumber, order.salesChannelId) %}
+                {% set additionalInfo = 'Rechnung-Nr.: ' ~ invoiceNumber %}
 
                 {% if qrCodeDataUri %}
                     <div class="wg-qr-payment-slip" style="
@@ -60,8 +62,13 @@
                                         {{ wg_qr_config('creditorZip', order.salesChannelId) }} {{ wg_qr_config('creditorCity', order.salesChannelId) }}
                                     </div>
 
-                                    <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Referenz</div>
-                                    <div style="font-size: 9px; margin-bottom: 8px;">{{ reference }}</div>
+                                    {% if referenceType != 'NON' and reference %}
+                                        <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Referenz</div>
+                                        <div style="font-size: 9px; margin-bottom: 8px;">{{ reference }}</div>
+                                    {% endif %}
+
+                                    <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Zusätzliche Informationen</div>
+                                    <div style="font-size: 9px; margin-bottom: 8px;">{{ additionalInfo }}</div>
 
                                     <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Zahlbar durch</div>
                                     <div style="font-size: 9px; margin-bottom: 8px;">
@@ -114,8 +121,13 @@
                                             {{ wg_qr_config('creditorZip', order.salesChannelId) }} {{ wg_qr_config('creditorCity', order.salesChannelId) }}
                                         </div>
 
-                                        <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Referenz</div>
-                                        <div style="font-size: 9px; margin-bottom: 8px;">{{ reference }}</div>
+                                        {% if referenceType != 'NON' and reference %}
+                                            <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Referenz</div>
+                                            <div style="font-size: 9px; margin-bottom: 8px;">{{ reference }}</div>
+                                        {% endif %}
+
+                                        <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Zusätzliche Informationen</div>
+                                        <div style="font-size: 9px; margin-bottom: 8px;">{{ additionalInfo }}</div>
 
                                         <div style="font-size: 7px; font-weight: bold; margin-bottom: 2px;">Zahlbar durch</div>
                                         <div style="font-size: 9px;">

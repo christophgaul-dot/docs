@@ -841,6 +841,105 @@ Im Template:
 
 ---
 
+## 14. Admin-Module werden nicht angezeigt (Shopware 6.6 + Vite)
+
+Erarbeitet bei der Entwicklung von **WGQrBill** (Mahnwesen-Modul im Admin-Backend).
+
+### 14.1 Das Symptom
+
+Ein Plugin mit eigenem Admin-Modul (Navigation-Eintrag, eigene Route) wird:
+- Korrekt als aktiv angezeigt in `php bin/console plugin:list`
+- Als Plugin in `var/plugins.json` registriert (inkl. `administrationEntryPath`)
+- **Aber:** Der Menüeintrag erscheint nicht in der Admin-Sidebar, die Route ist nicht aufrufbar
+
+Im HTML-Quelltext der Admin-Seite (`/admin`) wird **kein `<script>`-Tag** für das Plugin-JS geladen — nur die Haupt-Admin-Datei (`administration-<hash>.js`).
+
+### 14.2 Die Ursache
+
+In **Shopware 6.6+ mit Vite** werden **alle** Plugin-Admin-JS-Dateien zur Build-Zeit (`bin/build-administration.sh`) in **ein einziges Bundle** (`administration-<hash>.js`) zusammenkompiliert. Einzeln abgelegte Plugin-JS-Dateien unter `public/bundles/<plugin>/administration/js/` oder `assets/` werden **NICHT** mehr zur Laufzeit nachgeladen.
+
+> **Das heißt:** Ein Plugin mit Admin-Modul funktioniert nur dann, wenn es zum Zeitpunkt des Admin-Builds installiert war. Nachträglich installierte Plugins müssen den Admin neu bauen.
+
+Vergleich in der Praxis:
+
+| Plugin | public/bundles/<name>/administration/ | Funktioniert im Admin? |
+|---|---|---|
+| WGFaq (war beim Build installiert) | leer / existiert nicht | Ja (ist im Haupt-Bundle) |
+| WGQrBill (später installiert) | enthält `assets/w-g-qr-bill.js` | Nein (wird nicht geladen) |
+
+Die einzeln abgelegten Assets sind erreichbar unter `http://domain/bundles/wgqrbill/administration/assets/w-g-qr-bill.js` (HTTP 200) — aber die Admin lädt sie nie.
+
+### 14.3 Die Lösung: Admin neu bauen
+
+Nach dem Plugin-Deploy muss der Admin rebuild werden, damit das neue Modul im Haupt-Bundle landet:
+
+```bash
+cd /web/public
+./bin/build-administration.sh
+```
+
+Voraussetzungen:
+- Node.js (v20+ für Shopware 6.6) auf dem Server
+- Ausreichend RAM (≥ 2 GB, sonst OOM-Kill)
+- Schreibrechte auf `public/bundles/administration/`
+
+**Bei Shared-Hosting ohne Node:** Admin lokal bauen und die kompilierten Dateien aus `public/bundles/administration/administration/assets/` auf den Server hochladen. Das neue Bundle hat einen anderen Hash (z.B. `administration-<newhash>.js`), daher den kompletten Ordner `public/bundles/administration/` mit-deployen.
+
+### 14.4 Deploy-Checkliste für Admin-Plugin-Änderungen
+
+Nach **jedem** Plugin-Update mit Admin-Code:
+
+```bash
+# 1. Plugin-Quellen deployen (z.B. tar.gz extrahieren)
+cp -r /tmp/plugin-src/ /web/public/custom/plugins/<PluginName>/
+
+# 2. Plugin-Manifest aktualisieren
+cd /web/public && php bin/console bundle:dump
+
+# 3. Admin neu bauen (KRITISCH!)
+cd /web/public && ./bin/build-administration.sh
+
+# 4. Cache leeren
+cd /web/public && php bin/console cache:clear
+
+# 5. Im Browser: Ausloggen -> Hard-Refresh (Ctrl+Shift+R) -> Neu einloggen
+```
+
+### 14.5 Diagnose: Wird das Plugin-JS geladen?
+
+Schnelltest im Browser:
+
+1. Admin öffnen, **DevTools** (F12) → Tab **Network** → Filter z.B. `wgqrbill`
+2. **Ctrl+Shift+R** für Hard-Refresh
+3. Wenn **keine** Requests an `/bundles/<plugin>/...` sichtbar sind → Plugin ist nicht im Admin-Bundle
+
+Gegenprobe: Im HTML-Quelltext (`Ctrl+U` auf `/admin`) nach Plugin-Namen suchen. Nur `administration-<hash>.js` sichtbar? → Admin rebuild nötig.
+
+### 14.6 Falsche Fährten
+
+Folgende Dinge helfen **nicht** bei diesem Problem, auch wenn man sie oft versucht:
+
+- `bin/console cache:clear` alleine
+- `bin/console assets:install` — das kopiert nur Dateien nach `public/bundles/`
+- `bin/console bundle:dump` alleine — das schreibt nur `var/plugins.json`
+- Das Vite-Manifest (`public/bundles/<plugin>/administration/.vite/manifest.json`) hinzufügen
+- Die JS-Datei unter `js/<technical-name>.js` statt `assets/` ablegen (alte Webpack-Konvention, in 6.6+ irrelevant)
+- Browser-Cache leeren
+- Plugin deinstallieren/neu installieren
+
+**Nur** ein Admin-Rebuild bringt das Plugin in das geladene Bundle.
+
+### 14.7 Entwicklungs-Workflow-Empfehlung
+
+Für Plugins mit Admin-Code auf Produktion:
+
+1. Lokal entwickeln mit `./bin/watch-administration.sh` (Hot Reload)
+2. Vor Deploy: `./bin/build-administration.sh` lokal ausführen
+3. Gesamtes `public/bundles/administration/` mit-deployen (nicht nur Plugin-Verzeichnis)
+4. Alternativ: Auf dem Server direkt bauen (falls Node + RAM vorhanden)
+
+---
+
 *Stand: April 2026 | Shopware 6.6.x | ThemeWare Modern Pro 4.2.x*
 
 **— Webagentur Gaul | webagentur-gaul.de —**
